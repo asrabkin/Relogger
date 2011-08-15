@@ -1,0 +1,43 @@
+
+8/14:
+Several different numbering schemes.
+
+Local numbers are per-file and per version.  Of the form (hash-of-file, id)
+
+Global numbers are what's displayed. They are sequential. 
+
+When software is produced, can construct an explicit map. Can update the map when
+new code is seen.
+
+
+When a new version is released, construct a map from NewLocal to Global.
+Can just keep both maps; hash+id should make it unique.
+
+Properties:
+
+- if a code file is unchanged, numbers will always stay constant
+- gracefully handles code not seen statically; assigns it a number the first
+time and if the number is cached, will be stable forever.
+
+
+
+Can do same trick for C via library interposition
+same trick for python via loader? Cite SEJITS
+
+---
+Paper:
+
+Keep theme of "previous API, new API good"
+Show how to practically carve out new API for legacy systems
+Show how to handle version upgrades leveraging static analysis
+
+Should demonstrate dynamic reconfiguration
+Can flip between off, on, and summarize
+
+
+--
+Impl:
+Need a thread to listen for config instructions
+isEnabled table in log wrapper
+save-restore for local to global mapping
+--

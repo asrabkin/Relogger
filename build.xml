@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="numberlogs" default="compile">
+	<property name="version" value="0.1"/>
+
+	<target name="compile">
+		<mkdir dir="classes"/>
+		<javac debug="true" debuglevel="source,lines,vars" includeAntRuntime="false"
+			source="1.6" target="1.6" srcdir="src" destdir="classes">
+			<classpath>
+				<pathelement location="classes"/>
+				<fileset dir="lib" includes="*.jar"/>
+			</classpath>
+			</javac>
+		<jar destfile="numberedlogs.jar">
+			<fileset dir="classes"/>
+			<fileset dir="src"/>
+			<file file="COPYING"/>
+			<manifest>
+				<attribute name="Premain-Class" value="edu.berkeley.numberlogs.InstrNumberer"/>
+			</manifest>
+		</jar>
+	</target>
+	
+		<target name="javadoc">
+			<javadoc destdir="javadoc">
+				<fileset dir="src">
+					<include name="**/*.java"/>
+				</fileset>
+			</javadoc>
+		</target>
+		
+
+<!--
+	<target name="run" depends="paths">
+		<property name="chord.run.analyses" value="atomizer-java"/> 
+		<ant dir="${chord.home.dir}" target="run"/>
+	</target> -->
+
+	<target name="clean">
+		<delete dir="classes"/>
+		<delete dir="javadoc"/>
+	</target>
+		
+</project>
