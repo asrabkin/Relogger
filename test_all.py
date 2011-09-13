@@ -17,13 +17,16 @@ jar_path = "eclipse_build"
 libs = ""
 def main():
     global libs
-    print "running basic tests"
+    print "running relogger tests"
     if os.path.exists('relogger'):
         shutil.rmtree("relogger")
     shutil.os.mkdir("relogger")
     libs = get_libs()
-    print "running first test"
+    print "running first test: persistance"
     test_persist()
+    print "doing performance test"
+    test_performance()
+    
 
 def test_persist():
     run_and_capture_relogged("edu.berkeley.NondeterministicLoad", ["a"])
@@ -34,11 +37,23 @@ def test_persist():
         print "persistance works"
     else:
         print "persistance is broken"
+        
+        
+def test_performance():
+    unrelogged =  run_and_capture("edu.berkeley.LogPerfTest")
+    print "performance without relogger:"+ unrelogged
+    relogged = run_and_capture_relogged("edu.berkeley.LogPerfTest")    
+    print "performance with relogger:"+ relogged
 
 AGENT_INJECT="-javaagent:numberedlogs.jar"
 def run_and_capture_relogged(java_main, args=[]):
+    return run_and_capture(java_main, args, relogged=True)
 
-    cmd_array = ["java", AGENT_INJECT,"-ea", "-cp", jar_path+":conf:" + libs, java_main]
+def run_and_capture(java_main, args=[], relogged=False):
+    cmd_array = ["java"]
+    if relogged:
+        cmd_array.append(AGENT_INJECT)
+    cmd_array.extend( ["-ea", "-cp", jar_path+":conf:" + libs, java_main])
     cmd_array.extend(args)
     p = subprocess.Popen(cmd_array, stdout=subprocess.PIPE, stderr=None)
     (output, err) = p.communicate()

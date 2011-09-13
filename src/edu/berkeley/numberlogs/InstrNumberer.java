@@ -85,6 +85,8 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
     UDPCommandListener ucl = new UDPCommandListener();
     ucl.start();
     Runtime.getRuntime().addShutdownHook(new IDMapper.WriterThread(IDMap, outFile));
+    System.out.println("UDP listener alive on port " + ucl.portno);
+
   }
 
 
@@ -117,12 +119,13 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
     String cName = className.replace('/', '.');
 
     try {
-      classHash = getHash(classfileBuffer);
-      posInClass = 0;
       for(String prefix: excludePrefixes)
           if(cName.startsWith(prefix))
             return null;
-//      System.out.println("trying to transform "+cName);
+      classHash = getHash(classfileBuffer);
+      posInClass = 0;
+
+      //      System.out.println("trying to transform "+cName);
     
       CtClass inputClass = pool.makeClass(new ByteArrayInputStream(classfileBuffer));
       CtClass transformed = edit(inputClass);

@@ -21,8 +21,20 @@ public class LoggedProgram {
     LOG.warn("I am a second one");
     staticMeth();
     LoggedProgram p = new LoggedProgram();
-    p.dynMeth();
     p.withExcept(null);
+    p.dynMeth();
+
+    
+    try {
+    int loopsToGo = 300;
+    while(args.length > 0 && args[0].equals("loop") && loopsToGo-- > 0) {
+        LOG.info("I am looping forever");
+        Thread.sleep(1000);
+      }
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    
     System.out.println("Done");
   }
   
@@ -38,6 +50,5 @@ public class LoggedProgram {
     } catch(Exception e) {
       LOG.info("caught exception", e);
     }
-      }
-
+  }
 }

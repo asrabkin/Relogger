@@ -41,3 +41,31 @@ Need a thread to listen for config instructions
 isEnabled table in log wrapper
 save-restore for local to global mapping
 --
+
+8/22:
+
+Listen thread is set. Table saving is set. Is enabled table is present.
+Next steps:
+	Slurping local-to-global mapping.
+	Test script to show we can keep control of Hadoop classloading during MR job
+	Performance microbenchmark
+	Summarizing messages?
+
+9/12:
+Notes from Google talk
+	Should lookup Frost logger	by	 carl de marken
+	C is hard -- if statically linked, no library interposition.
+	tag system and api aren't thought through yet	
+	
+9/13:
+	Built microbenchmark.
+Warmup made a big difference. JIT effect?
+Raw Log4j no-log path is about 4ns
+No-log path in my code is 44ns
+Exit immediately with full code is 13 ns
+Exit immediately with most of the if branches commented out drops to 3ns 
+
+With short code but leaving in the dispatch table lookup is 29 ns
+
+Two serious sourc
+
