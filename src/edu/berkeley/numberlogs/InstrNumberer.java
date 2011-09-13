@@ -18,8 +18,10 @@ import java.io.*;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.ProtectionDomain;
-import java.util.HashSet;
+import java.util.*;
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtBehavior;
@@ -39,16 +41,14 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
    * @param instrumentation
    */
   public static void premain(String agentArgs, Instrumentation instrumentation) {
+    
     InstrNumberer numberer = new InstrNumberer();
     instrumentation.addTransformer(numberer);
   }
-  
-  
-  private final ClassPool pool;
-  protected CtClass currentClass;
-  protected CtBehavior currentMethod;
-
   public final static String PATH_SEPARATOR = File.pathSeparator + "|;";
+
+  static final String[] excludePrefixes = {"java", "sun", "org.apache.log4j", 
+      "edu.berkeley.numberlogs", "com"};
 
   static HashSet<String> LOG_CALLS;
   
@@ -60,11 +60,31 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
   }
   
   
+  private final ClassPool pool;
+  IDMapper IDMap;
+
+  
   public InstrNumberer() {
     System.out.println("Created numberer");
     pool = new ClassPool();
     addClasspathElems(System.getProperty("sun.boot.class.path"));
     addClasspathElems(System.getProperty("java.class.path"));
+    File outFile = IDMapper.DEFAULT_MAPPING;
+    
+    if(outFile.exists()) {
+      try { 
+        InputStream in = new FileInputStream(outFile);
+        IDMap = IDMapper.readMap(in);
+        in.close();
+      } catch(IOException e) {
+        e.printStackTrace();
+        IDMap = new IDMapper();
+      }
+    } else
+      IDMap = new IDMapper();
+    UDPCommandListener ucl = new UDPCommandListener();
+    ucl.start();
+    Runtime.getRuntime().addShutdownHook(new IDMapper.WriterThread(IDMap, outFile));
   }
 
 
@@ -80,9 +100,10 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
 
   
   
-  static final String[] excludePrefixes = {"java", "sun", "org.apache.log4j", 
-      "edu.berkeley.numberlogs", "com"};
-  
+  protected CtClass currentClass; //these are only defined during call to transform
+  protected CtBehavior currentMethod;
+  int posInClass;
+  String classHash;
   public synchronized byte[] transform(ClassLoader loader, String className,
       Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
       byte[] classfileBuffer) throws IllegalClassFormatException {
@@ -95,13 +116,14 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
     // className is of the form "java/lang/Object"
     String cName = className.replace('/', '.');
 
-    for(String prefix: excludePrefixes)
-        if(cName.startsWith(prefix))
-          return null;
-    System.out.println("trying to transform "+cName);
-    
-    Exception ex = null;
     try {
+      classHash = getHash(classfileBuffer);
+      posInClass = 0;
+      for(String prefix: excludePrefixes)
+          if(cName.startsWith(prefix))
+            return null;
+//      System.out.println("trying to transform "+cName);
+    
       CtClass inputClass = pool.makeClass(new ByteArrayInputStream(classfileBuffer));
       CtClass transformed = edit(inputClass);
 
@@ -109,15 +131,37 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
         return transformed.toBytecode();
       }
     } catch (IOException e) {
-      ex = e;
+      e.printStackTrace();
     } catch (CannotCompileException e) {
-      ex = e; 
-    }
-
-    if (ex != null) {
-      ex.printStackTrace();
+      System.out.println("Failure working on " + cName);
+      e.printStackTrace();
+    } catch (NoSuchAlgorithmException e) {
+      e.printStackTrace();
     }
     return null;
+  }
+
+  private String getHash(byte[] classfileBuffer) throws NoSuchAlgorithmException {
+    StringBuilder sb = new StringBuilder();
+    MessageDigest md = MessageDigest.getInstance("MD5");
+
+    md.update(classfileBuffer, 0, classfileBuffer.length);
+    byte[] bytes = md.digest();
+    for(int i=0; i < bytes.length; ++i) {
+      if( (bytes[i] & 0xF0) == 0)
+        sb.append('0');
+      sb.append( Integer.toHexString(0xFF & bytes[i]) );
+    }  
+    return sb.toString();
+  }
+
+  
+  class CtBehaviorComparator implements Comparator<CtBehavior> {
+
+    @Override
+    public int compare(CtBehavior o1, CtBehavior o2) {
+      return o1.toString().compareTo(o2.toString());
+    }
   }
 
   public CtClass edit(CtClass clazz) throws CannotCompileException {
@@ -129,6 +173,10 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
     for (CtBehavior m : inits)
       edit(m);
     CtBehavior[] meths = clazz.getDeclaredMethods();
+
+      //sort list. This matches static ordering.
+    java.util.Arrays.sort(meths, new CtBehaviorComparator());
+    
     for (CtBehavior m : meths) {
       edit(m);
     }
@@ -141,15 +189,15 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
   }
 
 
-  int nextID = 1;
   public void edit(MethodCall e) throws CannotCompileException { 
     int line = e.getLineNumber();
     String meth =  e.getMethodName();
     String dest = e.getClassName() + " " + meth;
-    System.out.println("editing method call on line "+ line + " to " + dest);
-    //e.getMethodName()
+    if( !(dest.startsWith("org.apache.log4j") || dest.startsWith("org.apache.commons.log")))
+        return;
     if(LOG_CALLS.contains(meth)) {
-      int id = nextID ++;
+//      System.out.println("editing method call on line "+ line + " to " + dest);
+      int id = IDMap.localToGlobal(classHash, posInClass++);
       e.replace("edu.berkeley.numberlogs.NumberedLogging.logmsg("+id +",\""+meth +"\",$0,$args);"); 
     }
     
