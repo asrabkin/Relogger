@@ -61,11 +61,37 @@ Notes from Google talk
 	Built microbenchmark.
 Warmup made a big difference. JIT effect?
 Raw Log4j no-log path is about 4ns
-No-log path in my code is 44ns
+No-log path in my code is 40ns
 Exit immediately with full code is 13 ns
 Exit immediately with most of the if branches commented out drops to 3ns 
 
 With short code but leaving in the dispatch table lookup is 29 ns
+Full length without dispatch table is 15 ns
 
-Two serious sourc
+Conclusions:
+	Dispatch table is 20-25 ns.
+	Code length imposes about 10 nm
+	Cascading 'if' itself is negligible
 
+
+Factoring out log calls to functions and using case statement:
+	Still 10ns of overhead over raw. Due to isEnabled() call?
+	isEnabled, alone, costs 4ns
+
+Tempting to just say "turn off log statement early, using the bitSet, so perf on log-not-taken doesn't mean anything."  But doesn't this mean we would need to hijack app calls to reset log priority?  
+
+If willing to tolerate some unsoundness, can fix this by saying "recompute isEnabled table after every app-level call to update priorities."
+
+BitSet copy is superfast -- half a microsecond. So with thousands of log statements, doing something for every log stmt once is O(millisecond)
+
+
+DESIGN Q:
+	Do we ignore user logger config or maintain it?  Maintaining means that we need to separate "turned off explicitly" from "implicitly"
+
+Possibility:
+	keep an explicit_disable. Locked around. Set by set() call and read by bulk_reupdate()
+	cached_disable is set by set() and bulk_reupdate(), in a copy-on-write manner.
+	read by logmsg.
+
+
+Tried it. Pretty sure the cache-disable is working. But why is it still slow?  Reversing the initial way the bit is set causes a 10 ns shift.
