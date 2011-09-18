@@ -95,3 +95,18 @@ Possibility:
 
 
 Tried it. Pretty sure the cache-disable is working. But why is it still slow?  Reversing the initial way the bit is set causes a 10 ns shift.
+Happens even if warmup and real call are on same log stmt. Happens with both client and server JVM.
+
+
+USEFUL LINKS:
+http://www.oracle.com/technetwork/java/javase/tech/vmoptions-jsp-140102.html java options
+http://wikis.sun.com/display/HotSpotInternals/PrintAssembly
+http://wikis.sun.com/display/HotSpotInternals/MicroBenchmarks
+http://wikis.sun.com/display/HotSpotInternals/PerformanceTechniques
+
+
+---
+
+9/18:
+	Using dense integers for statement numbers allows better data structures:
+	Using HashSet, is 7ns for toy perf test. Factor of 3.5?
