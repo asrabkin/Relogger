@@ -97,89 +97,32 @@ public class NumberedLogging {
     return sb.toString();
   }
 
-  public static void logmsg(int id, String original_methname, Logger log, Object[] args) {
-
-    //    if(!cachedMaskTable.get(id)) //NOTE this is backwards for testing.
+  public static void logmsg(int id, String original_methname, Logger log, Object msg, Throwable ex) {
     if(cachedMaskTable.get(id))
       return;
-    //   System.out.println("cache-miss, doing long resolve");
+    else longer_logmsg(id, original_methname, log, msg, ex);
+  }
+
+  //Split from above because JVMs don't always inline long methods.
+  private static void longer_logmsg(int id, String original_methname, Logger log, Object msg, Throwable ex) {
+    
 
     LEVS methname = getWarnLevel(id);
     if(methname == null)
       methname = setMeth(id, original_methname);
+    
+    Level level = Level.toLevel(methname.toString());
+    if(log.isEnabledFor(level))
+      if(ex == null)
+        log.log(level, "(" + id + ") " +msg);
+      else
+        log.log(level, "(" + id + ") " +msg, ex);
+    else
+      cached_disable(id);
+    //   System.out.println("cache-miss, doing long resolve");
 
-    switch(methname) {
-    case FATAL:
-      log4J_fatal(log, id, args);
-      break;
-    case ERROR:
-      log4J_error(log, id, args);
-      break;
-    case WARN:
-      log4J_warn(log, id, args);
-      break;
-    case INFO:
-      if(log.isInfoEnabled())
-        log4J_info(log, id, args);
-      else
-        cached_disable(id);
-      break;
-    case DEBUG:
-      if(log.isDebugEnabled())
-        log4J_debug(log, id, args);
-      else
-        cached_disable(id);
-      break;
-    case TRACE: 
-      if(log.isTraceEnabled())
-        log4J_trace(log, id, args);
-      else
-        cached_disable(id); 
-      break;
-    default:
-      //Or should do something dramatic here?
-          log.info(methname + "(" + id  + ") " +args[0]);
-    }
   }
 
-  public static void log4J_fatal(Logger log, int id, Object[] args) {
-    if(args.length == 1) 
-      log.fatal("(" + id + ") " +args[0]);
-    else
-      log.fatal("(" + id + ") " +args[0], (Throwable) args[1]);
-  }
-  public static void log4J_error(Logger log, int id, Object[] args) {
-    if(args.length == 1) 
-      log.error("(" + id + ") " +args[0]);
-    else
-      log.error("(" + id + ") " +args[0], (Throwable) args[1]);
-  }
-  public static void log4J_warn(Logger log, int id, Object[] args) {
-    if(args.length == 1) 
-      log.warn("(" + id + ") " +args[0]);
-    else
-      log.warn("(" + id + ") " +args[0], (Throwable) args[1]);
-  }
-  public static void log4J_info(Logger log, int id, Object[] args) {
-    if(args.length == 1) 
-      log.info("(" + id + ") " +args[0]);
-    else
-      log.info("(" + id + ") " +args[0], (Throwable) args[1]);
-  }
-  public static void log4J_debug(Logger log, int id, Object[] args) {
-    if(args.length == 1) 
-      log.debug("(" + id + ") " +args[0]);
-    else
-      log.debug("(" + id + ") " +args[0], (Throwable) args[1]);
-  }
-  public static void log4J_trace(Logger log, int id, Object[] args) {
-    System.out.println("Trace is enabled");
-    System.exit(0);
-    if(args.length == 1) 
-      log.trace("(" + id + ") " +args[0]);
-    else
-      log.trace("(" + id + ") " +args[0], (Throwable) args[1]);
-  }
 
 
   public static void logmsg(int id, String original_methname, org.apache.commons.logging.Log log, Object[] args) {
