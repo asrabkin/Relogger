@@ -19,14 +19,36 @@ def main():
     global libs
     print "running relogger tests"
     if os.path.exists('relogger'):
-        shutil.rmtree("relogger")
+        shutil.rmtree("relogger") #Deletes default cached-mappings.
     shutil.os.mkdir("relogger")
     libs = get_libs()
-    print "running first test: persistance"
+    print "Running base test"
+    test_base()
+    if os.path.exists('relogger'):
+        shutil.rmtree("relogger") #Deletes default cached-mappings.
+    shutil.os.mkdir("relogger")
+
+    print "running second test: persistance"
     test_persist()
     print "doing performance test"
     test_performance()
-    
+
+levels = ['fatal', 'error', 'warn', 'info']
+
+def    test_base():
+    base_out = run_and_capture_relogged("edu.berkeley.BaseTest").splitlines()
+    base_out = base_out[2:] #drop prolog
+    for i,lev in zip(range(1,4), levels):
+        expected = "%s main BaseTest - (%d) I am %s" % (lev.upper(), i, lev)
+        assert base_out[i-1].endswith(expected), "saw %s" % base_out[i-1]
+
+    for s,i,lev in zip(base_out[4::3], range(7,10), levels):
+        expected = "%s main BaseTest - (%d) I am %s" % (lev.upper(), i, lev)
+        assert s.endswith(expected)
+    for s in base_out[5::3]:
+        assert s == "java.io.IOException: An exception"
+    for s in base_out[6::3]:
+        assert s == '\tat edu.berkeley.BaseTest.main(BaseTest.java:21)'
 
 def test_persist():
     run_and_capture_relogged("edu.berkeley.NondeterministicLoad", ["a"])

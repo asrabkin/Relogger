@@ -33,8 +33,8 @@ public class LogPerfTest {
     for(int i=0; i < RUNS; ++i)
       printATrace("I am a simple log statement");
     long duration = System.currentTimeMillis() - startT;
-    long ns_per_log = duration * 1000 * 1000 / RUNS;
-    System.out.println(ns_per_log + "ns per un-used log stmt");
+    double ns_per_log = duration * 1000 * 1000.0 / RUNS;
+    System.out.printf("%.2f ns per un-used log stmt", ns_per_log);
     
   }
   private static void printATrace(String s) {
