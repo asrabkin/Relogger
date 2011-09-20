@@ -48,7 +48,7 @@ def    test_base():
     for s in base_out[5::3]:
         assert s == "java.io.IOException: An exception"
     for s in base_out[6::3]:
-        assert s == '\tat edu.berkeley.BaseTest.main(BaseTest.java:21)'
+        assert s == '\tat edu.berkeley.BaseTest.main(BaseTest.java:18)'
 
 def test_persist():
     run_and_capture_relogged("edu.berkeley.NondeterministicLoad", ["a"])

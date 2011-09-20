@@ -2,6 +2,7 @@ package edu.berkeley.numberlogs;
 
 import java.util.BitSet;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.commons.logging.Log;
 import org.apache.log4j.*;
 
 public class NumberedLogging {
@@ -105,8 +106,6 @@ public class NumberedLogging {
 
   //Split from above because JVMs don't always inline long methods.
   private static void longer_logmsg(int id, String original_methname, Logger log, Object msg, Throwable ex) {
-    
-
     LEVS methname = getWarnLevel(id);
     if(methname == null)
       methname = setMeth(id, original_methname);
@@ -123,53 +122,95 @@ public class NumberedLogging {
 
   }
 
-
-
-  public static void logmsg(int id, String original_methname, org.apache.commons.logging.Log log, Object[] args) {
-
-    if(isDisabled(id))
+  public static void logmsg(int id, String original_methname, org.apache.commons.logging.Log log, Object msg, Throwable ex) {
+    if(cachedMaskTable.get(id))
       return;
+    else longer_logmsg(id, original_methname, log, msg, ex);
+  }
 
-    LEVS methname = warnLevels.get(id);
+
+  public static void longer_logmsg(int id, String original_methname, org.apache.commons.logging.Log log, Object msg, Throwable ex) {
+
+    LEVS methname = getWarnLevel(id);
     if(methname == null)
       methname = setMeth(id, original_methname);
 
-    if(methname.equals("fatal")) {
-      if(args.length == 1) 
-        log.fatal("(" + id + ") " +args[0]);
+    switch(methname) {
+    case FATAL:
+      if(log.isFatalEnabled())
+          commonsLog_fatal(log, id, msg, ex);
       else
-        log.fatal("(" + id + ") " +args[0], (Throwable) args[1]);
-    } else if(methname.equals("error")) {
-      if(args.length == 1) 
-        log.error("(" + id + ") " +args[0]);
+          cached_disable(id);
+      break;
+    case ERROR:
+      if(log.isErrorEnabled())
+          commonsLog_error(log, id, msg, ex);
       else
-        log.error("(" + id + ") " +args[0], (Throwable) args[1]);
-    } else if(methname.equals("warn")) {
-      if(args.length == 1) 
-        log.warn("(" + id + ") " +args[0]);
+          cached_disable(id);
+      break;
+    case WARN:
+      if(log.isWarnEnabled())
+          commonsLog_warn(log, id, msg, ex);
       else
-        log.warn("(" + id + ") " +args[0], (Throwable) args[1]);
-    } else if(methname.equals("info")) {
-      if(args.length == 1) 
-        log.info("(" + id + ") " +args[0]);
+          cached_disable(id);
+      break;
+    case INFO:
+      if(log.isInfoEnabled())
+          commonsLog_info(log, id, msg, ex);
       else
-        log.info("(" + id + ") " +args[0], (Throwable) args[1]);
-    } else if(methname.equals("debug")) {
-      if(args.length == 1) 
-        log.debug("(" + id + ") " +args[0]);
+          cached_disable(id);
+      break;
+    case DEBUG:
+      if(log.isDebugEnabled())
+          commonsLog_debug(log, id, msg, ex);
       else
-        log.debug("(" + id + ") " +args[0], (Throwable) args[1]);
-    } else if(methname.equals("trace")) {
+          cached_disable(id);
+      break;
+    case TRACE:
       if(log.isTraceEnabled())
-        if(args.length == 1) 
-          log.trace("(" + id + ") " +args[0]);
-        else
-          log.trace("(" + id + ") " +args[0], (Throwable) args[1]);
-    } else {
-      log.info(methname + "(" + id  + ") " +args[0]);
-    }
-
+          commonsLog_trace(log, id, msg, ex);
+      else
+          cached_disable(id);
+      break;
+  }
     //    System.out.println(reformatArray(args));
   }
+  public static void commonsLog_fatal(Log log, int id, Object msg, Throwable ex) {
+    if(ex == null) 
+      log.fatal("(" + id + ") " +msg);
+    else
+      log.fatal("(" + id + ") " +msg, ex);
+  }
+  public static void commonsLog_error(Log log, int id, Object msg, Throwable ex) {
+    if(ex == null) 
+      log.error("(" + id + ") " +msg);
+    else
+      log.error("(" + id + ") " +msg, ex);
+  }
+  public static void commonsLog_warn(Log log, int id, Object msg, Throwable ex) {
+    if(ex == null) 
+      log.warn("(" + id + ") " +msg);
+    else
+      log.warn("(" + id + ") " +msg, ex);
+  }
+  public static void commonsLog_info(Log log, int id, Object msg, Throwable ex) {
+    if(ex == null) 
+      log.info("(" + id + ") " +msg);
+    else
+      log.info("(" + id + ") " +msg, ex);
+  }
+  public static void commonsLog_debug(Log log, int id, Object msg, Throwable ex) {
+    if(ex == null) 
+      log.debug("(" + id + ") " +msg);
+    else
+      log.debug("(" + id + ") " +msg, ex);
+  }
+  public static void commonsLog_trace(Log log, int id, Object msg, Throwable ex) {
+    if(ex == null) 
+      log.trace("(" + id + ") " +msg);
+    else
+      log.trace("(" + id + ") " +msg, ex);
+  }
+
 
 }

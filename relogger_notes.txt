@@ -95,3 +95,31 @@ Possibility:
 
 
 Tried it. Pretty sure the cache-disable is working. But why is it still slow?  Reversing the initial way the bit is set causes a 10 ns shift.
+
+-----
+
+9/20:
+	Timing is fixed!  Problem was the pass-by-array arg passing. Now at 2-ish ns, which is fast enough.
+	Using a regular set instead of BitSet raises time to 7ish ns -- too much.
+
+A potential unsoundness:  What if multiple logger values are passed to a given point? This is a strange style but not an impossible one, particularly in a wrapper context. 
+
+Can audit for statically without too much pain. We can't check a load-time if there's an open universe and the logger is non-private.
+
+Can punt by saying that we don't promise to maintain priorities set by legacy logger. Only best effort.
+
+Difficulty testing with commons_log -- how to get output to stdout not stderr?  Probably via attribute setting?
+
+
+Next thing to build:
+	output first message, always?  Easy to do, by changing the way that cached_disable is implemented.
+
+
+KEY RESEARCH Qs and CONTRIBUTIONS:
+	Show that many problems with logging today are due to grouping messages by value, without an explicit identification of source.
+	Show that we can retrofit a logging API, solving several practical problems, in ways that today's Aspect systems can't. (Log spew, message grouping)
+	Show that we can handle version migrations gracefully using static analysis to extract templates, and then fuzzy-matching the templates.
+
+Key ideas:
+	Separate canonical from sequential names. Sequential names are more efficient at runtime since they allow dense data structures. 
+	
