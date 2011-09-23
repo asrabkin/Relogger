@@ -2,7 +2,6 @@
  * Copyright (c) 2011 Ariel Rabkin 
  * All rights reserved.
  * 
- * 
  * Portions taken from JChord, by Mayur Naik, which is licensed under the New 
  * BSD License.
 
@@ -27,6 +26,7 @@ import javassist.ClassPool;
 import javassist.CtBehavior;
 import javassist.CtClass;
 import javassist.NotFoundException;
+import javassist.bytecode.Descriptor;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 
@@ -82,6 +82,8 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
       }
     } else
       IDMap = new IDMapper();
+    IDMapReconciler rec = new IDMapReconciler(outFile, IDMap);
+    rec.start();
     UDPCommandListener ucl = new UDPCommandListener();
     ucl.start();
     Runtime.getRuntime().addShutdownHook(new IDMapper.WriterThread(IDMap, outFile));
@@ -201,7 +203,14 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
     if(LOG_CALLS.contains(meth)) {
 //      System.out.println("editing method call on line "+ line + " to " + dest);
       int id = IDMap.localToGlobal(classHash, posInClass++);
-      e.replace("edu.berkeley.numberlogs.NumberedLogging.logmsg("+id +",\""+meth +"\",$0,$args);"); 
+      int nargs = Descriptor.numOfParameters(e.getSignature());
+      if(nargs == 1)
+        e.replace("edu.berkeley.numberlogs.NumberedLogging.logmsg("+id +",\""+meth +"\",$0,$1, null);"); 
+      else if(nargs == 2)
+        e.replace("edu.berkeley.numberlogs.NumberedLogging.logmsg("+id +",\""+meth +"\",$0,$1,$2);"); 
+      else
+        System.err.println("Logger call with 3 or more args. Panic!");
+
     }
     
   }

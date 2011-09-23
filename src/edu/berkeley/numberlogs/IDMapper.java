@@ -6,7 +6,11 @@ import java.util.*;
 import java.io.*;
 
 /**
- * A map between global and local IDs
+ * A map between global and local IDs. This is only used by the instrumentor.
+ * It is a singleton per program, since there is only one instrumentor.
+ * 
+ * Mappings may be added either due to a class-load or via the Reconciler thread;
+ * 
  * @author asrabkin
  *
  */
@@ -19,7 +23,7 @@ public class IDMapper {
   Map<String,Integer> mapping;
   
   protected IDMapper() {
-    this.mapping = new HashMap<String,Integer>();
+    this.mapping = new HashMap<String,Integer>(100);
   }
 
   
@@ -45,31 +49,51 @@ public class IDMapper {
   
   
   public static IDMapper readMap(InputStream in) throws IOException {
-    Map<String,Integer> mapping = new HashMap<String,Integer>();
+    IDMapper m = new IDMapper();
+    m.readAndUpdate(in);
+    return m;
+  }
+  
+  /**
+   * reads mappings from the supplied input stream.
+   * disregards mappings for already-mapped log messages.
+   * @param in
+   * @return true if there were any new mappings
+   */
+  public synchronized boolean readAndUpdate(InputStream in) throws IOException {
+    boolean madeChange = false;
     BufferedReader br = new BufferedReader(new InputStreamReader(in));
     
     String ln;
-    int maxID = 0;
     while( (ln = br.readLine()) != null) {
       String[] p = ln.split(" ");
       int globalID = Integer.parseInt(p[1]);
-      mapping.put(p[0], globalID);
-      if( globalID > maxID)
-        maxID = globalID;
+      if(!mapping.containsKey(p[0])) {
+        mapping.put(p[0], globalID);
+        madeChange = true;
+      }
+      if( globalID > nextID)
+        nextID = globalID + 1;
     }
     
-    br.close();
-    return new IDMapper(mapping, maxID);
+    br.close(); //FIXME: won't this close the inner?
+    return madeChange;
   }
   
-  public synchronized void writeMap(OutputStream rawOut) {
+  public synchronized int writeMap(OutputStream rawOut) {
     PrintStream ps = new PrintStream(rawOut);
+    
     for( Map.Entry<String, Integer> e: mapping.entrySet()) {
       ps.print(e.getKey());
       ps.print(' ');
       ps.print(e.getValue());
       ps.println();
     }
+    return mapping.size();
+  }
+  
+  public synchronized int size() {
+    return mapping.size();
   }
 
   static class WriterThread extends Thread{

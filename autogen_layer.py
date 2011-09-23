@@ -14,37 +14,41 @@ if_skel = """
     
 long_case_skel = """case %s:
     if(log.is%sEnabled())
-        log4J_%s(log, id, msg, ex);
+        commonsLog_%s(log, id, msg, ex);
     else
         cached_disable(id);
     break;"""
 short_case_skel = """case %s:
-        log4J_%s(log, id, msg, ex);
+        commonsLog_%s(log, id, msg, ex);
         break;"""
     
 has_isEnabled = ['info', 'debug','trace']    
-def for_level(l):
+def log4j_for_level(l):
     if l in has_isEnabled:
         return long_case_skel % (l.upper(), l.capitalize(), l)
     else:
         return short_case_skel % (l.upper(), l)
 
 
-stub_skel = """  public static void log4J_%s(%s log, int id, Object msg, Throwable ex) {
+def commons_for_level(l):
+    return long_case_skel % (l.upper(), l.capitalize(), l)
+
+
+stub_skel = """  public static void commonsLog_%s(%s log, int id, Object msg, Throwable ex) {
     if(ex == null) 
       log.%s("(" + id + ") " +msg);
     else
       log.%s("(" + id + ") " +msg, ex);
   }"""
 def lev_stub(lev ):
-    return stub_skel % (lev, "Logger", lev, lev)
+    return stub_skel % (lev, "Log", lev, lev)
     
     
 def main():
     
     print "switch(methname) {"
     for lev in levels:
-        print for_level(lev)
+        print "  ",commons_for_level(lev)
     print "}"
 
     for lev in levels:

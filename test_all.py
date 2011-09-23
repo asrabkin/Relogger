@@ -19,24 +19,55 @@ def main():
     global libs
     print "running relogger tests"
     if os.path.exists('relogger'):
-        shutil.rmtree("relogger")
+        shutil.rmtree("relogger") #Deletes default cached-mappings.
     shutil.os.mkdir("relogger")
     libs = get_libs()
-    print "running first test: persistance"
+    print "Running base test"
+    test_base()
+    if os.path.exists('relogger'):
+        shutil.rmtree("relogger") #Deletes default cached-mappings.
+    shutil.os.mkdir("relogger")
+
+    print "running second test: persistance"
     test_persist()
     print "doing performance test"
     test_performance()
+
+levels = ['fatal', 'error', 'warn', 'info']
+
+def    test_base():
+    out = run_and_capture_relogged("edu.berkeley.BaseTest").splitlines()
+    out = out[2:] #drop prolog
     
+    adj = 0
+    for base_out in (out[0:16], out[16:32]):
+        for i,lev in zip(range(1,4), levels):
+            expected = "%s main BaseTest - (%d) I am %s" % (lev.upper(), i + adj, lev)
+            assert base_out[i-1].endswith(expected), "saw %s" % base_out[i-1]
+    
+        for s,i,lev in zip(base_out[4::3], range(7,10), levels):
+            expected = "%s main BaseTest - (%d) I am %s" % (lev.upper(), i + adj, lev)
+            assert s.endswith(expected), "saw " + s
+        for s in base_out[5::3]:
+            assert s == "java.io.IOException: An exception", "saw " + s
+        for s in base_out[6::3]:
+            assert s == '\tat edu.berkeley.BaseTest.main(BaseTest.java:18)', "saw " + s 
+        adj += 12
 
 def test_persist():
-    run_and_capture_relogged("edu.berkeley.NondeterministicLoad", ["a"])
+    out1 = run_and_capture_relogged("edu.berkeley.NondeterministicLoad", ["a"])
     print "ran once"
     output = run_and_capture_relogged("edu.berkeley.NondeterministicLoad", ["b"])
     
     if "(4) I am class B" in output:
         print "persistance works"
     else:
-        print "persistance is broken"
+        print "persistance is broken, output follows:"
+        print "first run:\n--------"
+        print out1
+        print "\n\nsecond run:\n--------"
+        print output
+
         
         
 def test_performance():
