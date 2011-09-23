@@ -22,7 +22,7 @@ public class IDMapper {
 
   Map<String,Integer> mapping;
   
-  protected IDMapper() {
+  public IDMapper() {
     this.mapping = new HashMap<String,Integer>(100);
   }
 
@@ -36,7 +36,7 @@ public class IDMapper {
     nextID = maxID + 1;
   }
   
-  synchronized int localToGlobal(String classHash, int posInClass) {
+  public synchronized int localToGlobal(String classHash, int posInClass) {
     String key = classHash + "_" + posInClass; //clunky hack
     Integer v = mapping.get(key);
     if (v == null)  {
@@ -63,20 +63,27 @@ public class IDMapper {
   public synchronized boolean readAndUpdate(InputStream in) throws IOException {
     boolean madeChange = false;
     BufferedReader br = new BufferedReader(new InputStreamReader(in));
-    
-    String ln;
-    while( (ln = br.readLine()) != null) {
-      String[] p = ln.split(" ");
-      int globalID = Integer.parseInt(p[1]);
-      if(!mapping.containsKey(p[0])) {
-        mapping.put(p[0], globalID);
-        madeChange = true;
+
+    String ln = "";
+    try {
+      while( (ln = br.readLine()) != null) {
+        if(ln.length() < 1)
+          continue;
+        
+        String[] p = ln.split(" ");
+        int globalID = Integer.parseInt(p[1]);
+        if(!mapping.containsKey(p[0])) {
+          mapping.put(p[0], globalID);
+          madeChange = true;
+        }
+        if( globalID > nextID)
+          nextID = globalID + 1;
       }
-      if( globalID > nextID)
-        nextID = globalID + 1;
+    } catch(Exception e) {
+      System.err.println("Err; failure on line '" + ln+"'");
+      e.printStackTrace();
     }
     
-    br.close(); //FIXME: won't this close the inner?
     return madeChange;
   }
   
@@ -89,6 +96,7 @@ public class IDMapper {
       ps.print(e.getValue());
       ps.println();
     }
+    ps.flush();
     return mapping.size();
   }
   

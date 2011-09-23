@@ -96,6 +96,21 @@ Possibility:
 
 Tried it. Pretty sure the cache-disable is working. But why is it still slow?  Reversing the initial way the bit is set causes a 10 ns shift.
 
+
+
+USEFUL LINKS:
+http://www.oracle.com/technetwork/java/javase/tech/vmoptions-jsp-140102.html java options
+http://wikis.sun.com/display/HotSpotInternals/PrintAssembly
+http://wikis.sun.com/display/HotSpotInternals/MicroBenchmarks
+http://wikis.sun.com/display/HotSpotInternals/PerformanceTechniques
+
+
+---
+
+9/18:
+	Using dense integers for statement numbers allows better data structures:
+	Using HashSet, is 7ns for toy perf test. Factor of 3.5?
+
 -----
 
 9/20:
@@ -123,3 +138,8 @@ KEY RESEARCH Qs and CONTRIBUTIONS:
 Key ideas:
 	Separate canonical from sequential names. Sequential names are more efficient at runtime since they allow dense data structures. 
 	
+------
+
+9/23:
+	BUG:  Javassist sometimes sees BCs out of order.
+       Classhash plus BC in method isn't workable. Hash in method desc as well?

@@ -40,24 +40,29 @@ public class IDMapReconciler extends Thread {
         long latestMapSize = mapping.size();
         if(latestMod > prevModified || latestLen != prevLen || prevMapSize != latestMapSize) { 
              //we or somebody else did a write
-          
+//          System.out.println("Doing a read; now " + latestMapSize + " mappings");
           RandomAccessFile mapF = new RandomAccessFile(canonicalMappingFile, "rw");
           FileLock lock = mapF.getChannel().lock();
 
           FileInputStream f_in = new FileInputStream(mapF.getFD());
           boolean addedAMapping = mapping.readAndUpdate(f_in);
-          f_in.close();
-          if(addedAMapping) { //we added mappings
+          if(addedAMapping|| latestMapSize > prevMapSize) { //we added mappings
+            mapF.seek(0);
             FileOutputStream out = new FileOutputStream(mapF.getFD());
             latestMapSize = mapping.writeMap(out);
+//            System.out.println("just wrote map. File length is " + mapF.length());
+//          mapF.setLength(mapF.getFilePointer());
           }
 
           prevModified = canonicalMappingFile.lastModified();
           prevLen = canonicalMappingFile.length();
           prevMapSize = latestMapSize;
+
           lock.release();
           mapF.close();
-        }
+        } 
+//        else
+//          System.out.println("No change; still " + latestMapSize + " mappings");
       }
     } catch(InterruptedException e) {
         //do nothing, just unwind and exit

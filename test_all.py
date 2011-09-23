@@ -27,10 +27,10 @@ def main():
     if os.path.exists('relogger'):
         shutil.rmtree("relogger") #Deletes default cached-mappings.
     shutil.os.mkdir("relogger")
-
-    print "running second test: persistance"
+    print "......ok"
+    print "Running second test: persistance"
     test_persist()
-    print "doing performance test"
+    print "Doing performance test"
     test_performance()
 
 levels = ['fatal', 'error', 'warn', 'info']
@@ -56,11 +56,11 @@ def    test_base():
 
 def test_persist():
     out1 = run_and_capture_relogged("edu.berkeley.NondeterministicLoad", ["a"])
-    print "ran once"
+    print "...ran once"
     output = run_and_capture_relogged("edu.berkeley.NondeterministicLoad", ["b"])
     
     if "(4) I am class B" in output:
-        print "persistance works"
+        print "......ok"
     else:
         print "persistance is broken, output follows:"
         print "first run:\n--------"
@@ -72,9 +72,9 @@ def test_persist():
         
 def test_performance():
     unrelogged =  run_and_capture("edu.berkeley.LogPerfTest")
-    print "performance without relogger:"+ unrelogged
+    print "performance without relogger:\t"+ unrelogged
     relogged = run_and_capture_relogged("edu.berkeley.LogPerfTest")    
-    print "performance with relogger:"+ relogged
+    print "performance with relogger:\t"+ relogged.splitlines()[2]
 
 AGENT_INJECT="-javaagent:numberedlogs.jar"
 def run_and_capture_relogged(java_main, args=[]):

@@ -83,10 +83,10 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
     } else
       IDMap = new IDMapper();
     IDMapReconciler rec = new IDMapReconciler(outFile, IDMap);
-    rec.start();
+//    rec.start();
     UDPCommandListener ucl = new UDPCommandListener();
     ucl.start();
-    Runtime.getRuntime().addShutdownHook(new IDMapper.WriterThread(IDMap, outFile));
+//    Runtime.getRuntime().addShutdownHook(new IDMapper.WriterThread(IDMap, outFile));
     System.out.println("UDP listener alive on port " + ucl.portno);
 
   }
@@ -193,7 +193,6 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
     method.instrument(this);
   }
 
-
   public void edit(MethodCall e) throws CannotCompileException { 
     int line = e.getLineNumber();
     String meth =  e.getMethodName();
@@ -201,6 +200,7 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
     if( !(dest.startsWith("org.apache.log4j") || dest.startsWith("org.apache.commons.log")))
         return;
     if(LOG_CALLS.contains(meth)) {
+      
 //      System.out.println("editing method call on line "+ line + " to " + dest);
       int id = IDMap.localToGlobal(classHash, posInClass++);
       int nargs = Descriptor.numOfParameters(e.getSignature());

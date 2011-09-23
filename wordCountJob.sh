@@ -15,7 +15,7 @@ echo "Hadoop dir is $HADOOP confdir is $CONFDIR"
 
 export HADOOP_LOG_DIR=$TESTNAME
 
-echo "Clearing Hadoop log dir"
+echo "Clearing Hadoop log dir; logging to $HADOOP_LOG_DIR"
 rm -r $HADOOP/logs
 rm -r $HADOOP_LOG_DIR
 mkdir $HADOOP_LOG_DIR
