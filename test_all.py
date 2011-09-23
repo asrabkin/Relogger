@@ -36,29 +36,38 @@ def main():
 levels = ['fatal', 'error', 'warn', 'info']
 
 def    test_base():
-    base_out = run_and_capture_relogged("edu.berkeley.BaseTest").splitlines()
-    base_out = base_out[2:] #drop prolog
-    for i,lev in zip(range(1,4), levels):
-        expected = "%s main BaseTest - (%d) I am %s" % (lev.upper(), i, lev)
-        assert base_out[i-1].endswith(expected), "saw %s" % base_out[i-1]
-
-    for s,i,lev in zip(base_out[4::3], range(7,10), levels):
-        expected = "%s main BaseTest - (%d) I am %s" % (lev.upper(), i, lev)
-        assert s.endswith(expected)
-    for s in base_out[5::3]:
-        assert s == "java.io.IOException: An exception"
-    for s in base_out[6::3]:
-        assert s == '\tat edu.berkeley.BaseTest.main(BaseTest.java:18)'
+    out = run_and_capture_relogged("edu.berkeley.BaseTest").splitlines()
+    out = out[2:] #drop prolog
+    
+    adj = 0
+    for base_out in (out[0:16], out[16:32]):
+        for i,lev in zip(range(1,4), levels):
+            expected = "%s main BaseTest - (%d) I am %s" % (lev.upper(), i + adj, lev)
+            assert base_out[i-1].endswith(expected), "saw %s" % base_out[i-1]
+    
+        for s,i,lev in zip(base_out[4::3], range(7,10), levels):
+            expected = "%s main BaseTest - (%d) I am %s" % (lev.upper(), i + adj, lev)
+            assert s.endswith(expected), "saw " + s
+        for s in base_out[5::3]:
+            assert s == "java.io.IOException: An exception", "saw " + s
+        for s in base_out[6::3]:
+            assert s == '\tat edu.berkeley.BaseTest.main(BaseTest.java:18)', "saw " + s 
+        adj += 12
 
 def test_persist():
-    run_and_capture_relogged("edu.berkeley.NondeterministicLoad", ["a"])
+    out1 = run_and_capture_relogged("edu.berkeley.NondeterministicLoad", ["a"])
     print "ran once"
     output = run_and_capture_relogged("edu.berkeley.NondeterministicLoad", ["b"])
     
     if "(4) I am class B" in output:
         print "persistance works"
     else:
-        print "persistance is broken"
+        print "persistance is broken, output follows:"
+        print "first run:\n--------"
+        print out1
+        print "\n\nsecond run:\n--------"
+        print output
+
         
         
 def test_performance():

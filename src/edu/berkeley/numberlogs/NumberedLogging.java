@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2011 Ariel Rabkin 
+ * All rights reserved.
+ */
 package edu.berkeley.numberlogs;
 
 import java.util.BitSet;

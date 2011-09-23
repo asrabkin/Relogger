@@ -2,7 +2,6 @@
  * Copyright (c) 2011 Ariel Rabkin 
  * All rights reserved.
  * 
- * 
  * Portions taken from JChord, by Mayur Naik, which is licensed under the New 
  * BSD License.
 
@@ -83,6 +82,8 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
       }
     } else
       IDMap = new IDMapper();
+    IDMapReconciler rec = new IDMapReconciler(outFile, IDMap);
+    rec.start();
     UDPCommandListener ucl = new UDPCommandListener();
     ucl.start();
     Runtime.getRuntime().addShutdownHook(new IDMapper.WriterThread(IDMap, outFile));
