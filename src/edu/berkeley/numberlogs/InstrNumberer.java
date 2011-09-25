@@ -42,7 +42,8 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
    */
   public static void premain(String agentArgs, Instrumentation instrumentation) {
     
-    InstrNumberer numberer = new InstrNumberer();
+    InstrNumberer numberer = new InstrNumberer();//this will trigger a whole bunch
+        //of initialization and class loads -- before the transformer hooks are in.
     instrumentation.addTransformer(numberer);
   }
   public final static String PATH_SEPARATOR = File.pathSeparator + "|;";
@@ -83,10 +84,11 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
     } else
       IDMap = new IDMapper();
     IDMapReconciler rec = new IDMapReconciler(outFile, IDMap);
-//    rec.start();
+    IDMapReconciler.doDummyWrite(outFile);
+    rec.start(); //TODO: is there a race condition if the thread hasn't started before stop?
     UDPCommandListener ucl = new UDPCommandListener();
     ucl.start();
-//    Runtime.getRuntime().addShutdownHook(new IDMapper.WriterThread(IDMap, outFile));
+    Runtime.getRuntime().addShutdownHook(new IDMapReconciler.WriterThread(rec));
     System.out.println("UDP listener alive on port " + ucl.portno);
 
   }

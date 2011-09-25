@@ -1,10 +1,12 @@
 #!/bin/bash
 
+ant
+
 export JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Versions/1.6.0/Home
 HADOOP=/Users/asrabkin/workspace/hadoop-0.20.2
 
 export HADOOP_OPTS="-javaagent:numberedlogs.jar"
-export HADOOP_CLASSPATH=lib/javassist.jar
+export HADOOP_CLASSPATH=lib/javassist-3.15.0.jar
 
 #HADOOP=/Users/asrabkin/Documents/cloudera/hadoop-0.20.2-cdh3u0
 CONFDIR=hadoop_conf
@@ -38,7 +40,7 @@ else
 fi
 
 date
-echo "starting JT and TT; expect a 20 second pause"
+echo "starting JT and TT; expect a 20 second pause. Showing console from FS client."
 
 ($HADOOP/bin/hadoop --config $CONFDIR jobtracker > $TESTNAME/jt.log 2>&1) &
 ($HADOOP/bin/hadoop --config $CONFDIR tasktracker > $TESTNAME/tt.log 2>&1) &
@@ -57,14 +59,14 @@ exit 1
 fi
 
 date
-echo "Submitting job; allowing 60 seconds to run"
+echo "Submitting job; allow 60 seconds to run" #note that script blocks for job to finish.
 HADOOPEXAMPLE=`ls $HADOOP/hadoop-*example*.jar`
 $HADOOP/bin/hadoop --config $CONFDIR jar $HADOOPEXAMPLE wordcount /tmpshells /tout > $TESTNAME/submit.log 2>&1
 
-sleep 60
+#sleep 60
 
-cat $HADOOP/logs/userlogs/*/*/syslog > $TESTNAME/userlogs.log
-
+cat $HADOOP_LOG_DIR/userlogs/*/syslog > $TESTNAME/userlogs.log
+echo "DONE!"
 for proc in `ps aux | grep hadoop | grep -v 'grep' | grep -vi python | grep -v chord  | awk '{} {print $2}'` ;  do 
 echo "killing $proc"
 kill $proc

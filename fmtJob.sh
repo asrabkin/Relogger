@@ -4,7 +4,7 @@ export JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Versions/1.6.0/Home
 HADOOP=/Users/asrabkin/workspace/hadoop-0.20.2
 
 export HADOOP_OPTS="-javaagent:numberedlogs.jar"
-export HADOOP_CLASSPATH=lib/javassist.jar
+export HADOOP_CLASSPATH=lib/javassist-3.15.0.jar
 
 #HADOOP=/Users/asrabkin/Documents/cloudera/hadoop-0.20.2-cdh3u0
 CONFDIR=hadoop_conf

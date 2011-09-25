@@ -141,5 +141,12 @@ Key ideas:
 ------
 
 9/23:
-	BUG:  Javassist sometimes sees BCs out of order.
+	POSSIBLE BUG:  Javassist sometimes sees BCs out of order.
        Classhash plus BC in method isn't workable. Hash in method desc as well?
+
+9/24:
+	
+Deadlock caused by:
+	Reconciler gets a lock on the IDMapper, then tries to write.
+		This triggers a class load.
+	Meanwhile, the class loader has a lock on something and tries to do a map lookup. Fix is to load all classes in advance.

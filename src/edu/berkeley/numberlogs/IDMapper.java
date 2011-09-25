@@ -19,7 +19,6 @@ public class IDMapper {
   int nextID = 1;
   public static final File DEFAULT_MAPPING = new File("relogger/mapping.out");
 
-
   Map<String,Integer> mapping;
   
   public IDMapper() {
@@ -67,7 +66,7 @@ public class IDMapper {
     String ln = "";
     try {
       while( (ln = br.readLine()) != null) {
-        if(ln.length() < 1)
+        if(ln.length() < 2)
           continue;
         
         String[] p = ln.split(" ");
