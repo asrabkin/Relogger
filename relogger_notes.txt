@@ -150,3 +150,36 @@ Deadlock caused by:
 	Reconciler gets a lock on the IDMapper, then tries to write.
 		This triggers a class load.
 	Meanwhile, the class loader has a lock on something and tries to do a map lookup. Fix is to load all classes in advance.
+
+
+Algorithm for printing should be:
+If first time, print. Mark as not-first-time
+Else if check if enabled, print.
+
+Need one Copy-on-write bitset, cached-disable, which is initially all zeros.
+Separately have both a user-disabled, underlying-disabled and printed-once.
+	cached-disable is  printed-once & (user | underlying-disabled)
+
+Print-once can be done by just twiddling the printed-once bit.
+
+---
+
+Hard part is exactly how to incorporate legacy API. Seems like we have three cases:   user-enabled, user-disabled, and underlying-disabled.
+Howabout this:
+	On a rebuild,
+	cache_disable = user_disable 
+		Separately, maintain  printed-once and user-enabled.
+	We then incrementally start cache-disabling when we hit a legacy disable.
+
+If not cache-disabled:
+	if ~printed_once or user_enabled, 
+		print
+		set printed_once
+	else
+		fall back on native, set cache-disable if not user_enabled
+
+
+Overhead on log-taken branch is a few hundred nanos. Without relogger, should be around 580 ns.  With relogger, currently about 760-780, for a 200 ns overhead. 
+	If there are a hundred messages per second, that's about 20 microseconds per second.  That's a few parts in a million.  
+
+Can display tags via Log4j by subclassing Level

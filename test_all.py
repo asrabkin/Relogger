@@ -74,7 +74,7 @@ def test_performance():
     unrelogged =  run_and_capture("edu.berkeley.LogPerfTest")
     print "performance without relogger:\t"+ unrelogged
     relogged = run_and_capture_relogged("edu.berkeley.LogPerfTest")    
-    print "performance with relogger:\t"+ relogged.splitlines()[2]
+    print "performance with relogger:\t"+ "\n".join(relogged.splitlines()[2:5])
 
 AGENT_INJECT="-javaagent:numberedlogs.jar"
 def run_and_capture_relogged(java_main, args=[]):

@@ -41,9 +41,9 @@ public class UDPCommandListener extends Thread {
       String cmd = words[0].toLowerCase();
       int line = Integer.parseInt(words[1]);
       if(cmd.equals("up")) {
-        NumberedLogging.update(line, false);
+        NumberedLogging.updateUser(line, false);
       } else if(cmd.equals("down")) {
-        NumberedLogging.update(line, true);
+        NumberedLogging.updateUser(line, true);
       } else if (cmd.equals("setmeth") && words.length > 2) {
         NumberedLogging.setMeth(line, words[2]);
       } else {

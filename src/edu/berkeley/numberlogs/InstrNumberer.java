@@ -41,8 +41,7 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
    * @param instrumentation
    */
   public static void premain(String agentArgs, Instrumentation instrumentation) {
-    
-    InstrNumberer numberer = new InstrNumberer();//this will trigger a whole bunch
+    InstrNumberer numberer = new InstrNumberer(agentArgs);//this will trigger a whole bunch
         //of initialization and class loads -- before the transformer hooks are in.
     instrumentation.addTransformer(numberer);
   }
@@ -65,7 +64,21 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
   IDMapper IDMap;
 
   
-  public InstrNumberer() {
+  public InstrNumberer(String agentArgs) {
+    
+    int portno = UDPCommandListener.DEFAULT_PORT;
+    if(agentArgs != null) {
+      for(String s: agentArgs.split(",")) {
+        String[] k_v = s.split("=");
+        if(k_v.length != 2) {
+          System.err.println("syntax error. Relogger config is a comma-separated series of settings.");
+          System.err.println("Options are portno,file,alwaysonce");
+        }
+        if(k_v[0].equals("port") || k_v[0].equals("portno"))
+          portno = Integer.parseInt(k_v[1]);
+      }
+    }
+    
     System.out.println("Created numberer");
     pool = new ClassPool();
     addClasspathElems(System.getProperty("sun.boot.class.path"));
@@ -86,7 +99,7 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
     IDMapReconciler rec = new IDMapReconciler(outFile, IDMap);
     IDMapReconciler.doDummyWrite(outFile);
     rec.start(); //TODO: is there a race condition if the thread hasn't started before stop?
-    UDPCommandListener ucl = new UDPCommandListener();
+    UDPCommandListener ucl = new UDPCommandListener(portno);
     ucl.start();
     Runtime.getRuntime().addShutdownHook(new IDMapReconciler.WriterThread(rec));
     System.out.println("UDP listener alive on port " + ucl.portno);
