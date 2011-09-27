@@ -190,3 +190,10 @@ Can display tags via Log4j by subclassing Level
 		One bit for "print to log or not"
 		One bit for "maybe record to file"
 		Any combination is possible, since user might want messages recorded to mapping-file, only, not to logger output.
+
+Users might want to disable a statement by file and lineno, without knowing the ID. Supporting this requires a few changes:
+	UDPListener can take either a short ID or else a longer ID.  (Lookup longer IDs in the Mapping table.)
+	Add classname:lineno to the ID table. Won't conflict with hashes since hashes have underscore and no colon. 
+	This also allows enabling/disabling messages by canonical ID.
+
+Added support for recording messages. Added support for reset-all.
