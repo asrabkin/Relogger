@@ -1,6 +1,5 @@
 package edu.berkeley;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.BitSet;
 import org.apache.commons.logging.Log;
@@ -52,11 +51,11 @@ public class LogPerfTest {
       JavaLOG.fine("me too!");
     }
 
-    testLog4jUnused();
+    double ns_per_log = testLog4jUnused();
+    System.out.printf("%.2f ns per un-used Log4j log stmt\n", ns_per_log);
     
     long startT;
     long duration;
-    double ns_per_log;    
     
     WriterAppender bufferAppender = new WriterAppender(new SimpleLayout(), new DummyOutputStream());
     LOG.removeAllAppenders();
@@ -98,13 +97,12 @@ public class LogPerfTest {
   }
 
 
-  private static void testLog4jUnused() {
+  private static double testLog4jUnused() {
     long startT = System.currentTimeMillis();
     for(int i=0; i < RUNS; ++i)
       LOG.trace("I am a simple log statement");
     long duration = System.currentTimeMillis() - startT;
-    double ns_per_log = duration * 1000 * 1000.0 / RUNS;
-    System.out.printf("%.2f ns per un-used Log4j log stmt\n", ns_per_log);
+    return duration * 1000 * 1000.0 / RUNS;
   }
   
   

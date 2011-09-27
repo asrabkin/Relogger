@@ -23,7 +23,7 @@ public class ReconcilerTest {
     String myHashStr = "hashme";
     for( int i =0 ; i < 200; ++i) {
       int nextid = (i + myID.hashCode()) % 200;
-      mapper.localToGlobal(myHashStr, nextid);
+      mapper.localToGlobal(myHashStr, nextid, "classname", nextid);
       Thread.sleep(75);
       if(i % 10 ==0)
         System.out.println(myID + " is alive; " + mapper.size() + " mappings");

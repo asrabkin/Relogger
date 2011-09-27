@@ -128,7 +128,7 @@ public class IDMapReconciler extends Thread {
       fos.getChannel(); //trigger a class load
       fos.getFD(); //trigger a class load
       IDMapper dummyMapper = new IDMapper();
-      dummyMapper.localToGlobal(" ", 1);
+      dummyMapper.localToGlobal(" ", 1, "dummyclassname", 1);
       dummyMapper.writeMap(fos);
       fos.close();
     } catch (IOException e) {

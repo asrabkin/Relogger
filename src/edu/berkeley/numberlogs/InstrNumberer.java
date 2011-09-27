@@ -103,6 +103,7 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
       }
     } else
       IDMap = new IDMapper();
+    RecordStatements.init(outFile.getParentFile(), IDMap);
     IDMapReconciler rec = new IDMapReconciler(outFile, IDMap);
     IDMapReconciler.doDummyWrite(outFile);
     rec.start(); //TODO: is there a race condition if the thread hasn't started before stop?
@@ -230,7 +231,7 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
     if(targ != null && LOG_CALLS.contains(meth)) {
       
 //      System.out.println("editing method call on line "+ line + " to " + dest);
-      int id = IDMap.localToGlobal(classHash, posInClass++);
+      int id = IDMap.localToGlobal(classHash, posInClass++, currentClass.getName(), line);
       int nargs = Descriptor.numOfParameters(e.getSignature());
       if(nargs == 1)
         e.replace(targ + ".logmsg("+id +",\""+meth +"\",$0,$1, null);"); 

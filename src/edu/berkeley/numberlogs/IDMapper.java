@@ -16,13 +16,28 @@ import java.io.*;
  */
 public class IDMapper {
   
+  public static class StmtInfo {
+    public String canonicalID;
+    public String classname;
+    public int lineno;
+    
+    public StmtInfo(String canonicalID, String classname, int lineno) {
+      this.canonicalID = canonicalID;
+      this.classname = classname;
+      this.lineno = lineno;
+    }
+    
+  }
+  
   int nextID = 1;
   public static final File DEFAULT_MAPPING = new File("relogger/mapping.out");
 
   Map<String,Integer> mapping;
+  Map<Integer, StmtInfo> info; //info about each canonical-number
   
   public IDMapper() {
     this.mapping = new HashMap<String,Integer>(100);
+    this.info = new HashMap<Integer, StmtInfo>(100);
   }
 
   
@@ -35,13 +50,15 @@ public class IDMapper {
     nextID = maxID + 1;
   }
   
-  public synchronized int localToGlobal(String classHash, int posInClass) {
-    String key = classHash + "_" + posInClass; //clunky hack
+  public synchronized int localToGlobal(String classHash, int posInClass, String classname, int lineno) {
+    String key = classHash + "_" + posInClass; 
     Integer v = mapping.get(key);
     if (v == null)  {
       v = nextID++;
       mapping.put(key, v);
-      
+    }
+    if(!info.containsKey(v)) {
+      info.put(v, new StmtInfo(key, classname, lineno));
     }
     return v;
   }
@@ -121,6 +138,10 @@ public class IDMapper {
       }
     }
     
+  }
+
+  public synchronized StmtInfo getInfo(int stmtID) {
+    return info.get(stmtID);
   }
 
 }

@@ -13,10 +13,9 @@ if_skel = """
     } """ 
     
 long_case_skel = """case %s:
-    if(log.is%sEnabled())
+    shouldPrint = shouldPrint(id, log.is%sEnabled());    
+    if( (shouldPrint & LOG_OUT) !=0)
         commonsLog_%s(log, id, msg, ex);
-    else
-        cached_disable(id);
     break;"""
 short_case_skel = """case %s:
         commonsLog_%s(log, id, msg, ex);

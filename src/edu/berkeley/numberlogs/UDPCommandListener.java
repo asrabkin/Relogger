@@ -39,13 +39,15 @@ public class UDPCommandListener extends Thread {
     try {
       String[] words = contents.split("\\s+");
       String cmd = words[0].toLowerCase();
-      int line = Integer.parseInt(words[1]);
+      int stmtID = Integer.parseInt(words[1]);
       if(cmd.equals("up")) {
-        NumberedLogging.updateUser(line, false);
+        NumberedLogging.updateUser(stmtID, false);
       } else if(cmd.equals("down")) {
-        NumberedLogging.updateUser(line, true);
+        NumberedLogging.updateUser(stmtID, true);
       } else if (cmd.equals("setmeth") && words.length > 2) {
-        NumberedLogging.setMeth(line, words[2]);
+        NumberedLogging.setMeth(stmtID, words[2]);
+      } else if(cmd.equals("once")) {
+        NumberedLogging.clearPrintedOnce(stmtID);
       } else {
         System.err.println("Unknown log-rewrite command " + cmd);
       }

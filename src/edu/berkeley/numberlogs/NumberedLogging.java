@@ -6,7 +6,6 @@ package edu.berkeley.numberlogs;
 
 import java.util.BitSet;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.commons.logging.Log;
 
 public class NumberedLogging {
 
@@ -20,7 +19,9 @@ public class NumberedLogging {
   static BitSet printedOnce = new BitSet(); //this is undefined if user-enabled.
 
   static boolean ALWAYS_PRINT_ONCE = false;
+  static boolean RECORD_ONCE = true;
 
+  
   public enum LEVS {FATAL, ERROR, WARN, INFO, DEBUG,TRACE, UNKNOWN};
 
   public static LEVS levNameToLevel(String methname) {
@@ -43,15 +44,39 @@ public class NumberedLogging {
   static synchronized void updateUser(int i, boolean isDisabled) {
     //Updates both user and cached map table
     userDisabled.set(i, isDisabled);
-    rebuildCachedDisable();
+    userEnabled.set(i, !isDisabled);
+    changeCacheDisable(i, isDisabled);
   }
   
-  static void rebuildCachedDisable() {
-    int newLen = cachedMaskTable.size();
 
+  public static synchronized void clearPrintedOnce(int stmtID) {
+    printedOnce.clear(stmtID);
+    changeCacheDisable(stmtID, false);
+  }
+
+  /**
+   * Change a bit in the cachedMaskTable, recopying table.
+   * CALLER LOCKS
+   * @param id
+   * @param newVal
+   */
+  private static void changeCacheDisable(int id, boolean newVal) {
+    int newLen = Math.max(id, cachedMaskTable.size());
+    BitSet newTable = new BitSet(newLen);
+    newTable.or(cachedMaskTable);
+    newTable.set(id, newVal);
+    cachedMaskTable = newTable;
+  }
+
+  
+    /** resets cached-disable table, throwing out all cached changes.
+     *  Call this after a change to underlying logger config.
+     */
+  public static synchronized void resetCachedDisable() {
+    int newLen = cachedMaskTable.size();
     BitSet newTable = new BitSet(newLen);
     newTable.or(userDisabled);
-    cachedMaskTable = newTable;
+    cachedMaskTable = newTable;  
   }
 
   public static LEVS setMeth(int line, String methname) {
@@ -71,6 +96,35 @@ public class NumberedLogging {
     //    return LEVS.TRACE;
   }
 
+  protected static final int LOG_OUT = 1; //constant indicating message should be printed
+  protected static final int RECORD_OUT = 2; //constant indicating caller should format and record message
+  
+  protected static synchronized int shouldPrint(int id, boolean legacyEnabled) {
+    int returnV = 0;
+    
+    if(!printedOnce.get(id)) {
+      printedOnce.set(id);
+      if(ALWAYS_PRINT_ONCE)
+        returnV |= LOG_OUT;
+      if(RECORD_ONCE)
+        returnV |= RECORD_OUT;
+    }
+    
+    if(userEnabled.get(id))
+      return LOG_OUT | returnV;
+    
+    if(!legacyEnabled) {
+        //should disable message, since user didn't say and legacy logger disabled
+      changeCacheDisable(id, true);
+      return returnV; //decision to print based on whether was first-time or sampling
+    }
+    
+  //legacy enabled. 
+  //Any user-disable was merged into the cache-disable mask.
+    return LOG_OUT | returnV; 
+  }
+
+
   public static String reformatArray(Object[] arr) {
 
     StringBuilder sb = new StringBuilder();
@@ -86,30 +140,6 @@ public class NumberedLogging {
       sb.deleteCharAt(sb.length() -1);
     sb.append("}");
     return sb.toString();
-  }
-
-
-  protected static synchronized boolean shouldPrint(int id, boolean legacyEnabled) {
-    if(userEnabled.get(id))
-      return true;
-    
-    if(!legacyEnabled) {
-        //cache disable
-      int newLen = cachedMaskTable.size();
-      if (id > newLen)
-        newLen = id;
-      BitSet newTable = new BitSet(newLen);
-      newTable.or(cachedMaskTable);
-      newTable.set(id);
-      cachedMaskTable = newTable;
-      
-      boolean printedBefore = !ALWAYS_PRINT_ONCE | printedOnce.get(id);
-      if(!printedBefore) {
-        printedOnce.set(id);
-      }
-       return !printedBefore; //print if this was first time
-    }
-    return true; //user-disable was merged into the cache-disable mask
   }
 
 

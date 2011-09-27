@@ -183,3 +183,10 @@ Overhead on log-taken branch is a few hundred nanos. Without relogger, should be
 	If there are a hundred messages per second, that's about 20 microseconds per second.  That's a few parts in a million.  
 
 Can display tags via Log4j by subclassing Level
+
+
+9/27:
+	shouldIPrint needs a four-way return:
+		One bit for "print to log or not"
+		One bit for "maybe record to file"
+		Any combination is possible, since user might want messages recorded to mapping-file, only, not to logger output.
