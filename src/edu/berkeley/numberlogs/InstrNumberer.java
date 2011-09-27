@@ -67,6 +67,8 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
   public InstrNumberer(String agentArgs) {
     
     int portno = UDPCommandListener.DEFAULT_PORT;
+    File outFile = IDMapper.DEFAULT_MAPPING;
+
     if(agentArgs != null) {
       for(String s: agentArgs.split(",")) {
         String[] k_v = s.split("=");
@@ -74,8 +76,14 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
           System.err.println("syntax error. Relogger config is a comma-separated series of settings.");
           System.err.println("Options are portno,file,alwaysonce");
         }
-        if(k_v[0].equals("port") || k_v[0].equals("portno"))
-          portno = Integer.parseInt(k_v[1]);
+        String optKey = k_v[0];
+        String optVal = k_v[1];
+        if(optKey.equals("port") || optKey.equals("portno"))
+          portno = Integer.parseInt(optVal);
+        else if(optKey.equals("alwaysonce"))
+          NumberedLogging.ALWAYS_PRINT_ONCE = !optVal.equals("false"); //default to true
+        else if(optKey.equals("file"))
+          outFile = new File(optVal);
       }
     }
     
@@ -83,7 +91,6 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
     pool = new ClassPool();
     addClasspathElems(System.getProperty("sun.boot.class.path"));
     addClasspathElems(System.getProperty("java.class.path"));
-    File outFile = IDMapper.DEFAULT_MAPPING;
     
     if(outFile.exists()) {
       try { 
@@ -212,20 +219,25 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
     int line = e.getLineNumber();
     String meth =  e.getMethodName();
     String dest = e.getClassName() + " " + meth;
-    if( !(dest.startsWith("org.apache.log4j") || dest.startsWith("org.apache.commons.log")))
-        return;
-    if(LOG_CALLS.contains(meth)) {
+    
+    String targ = null;
+    
+    if(dest.startsWith("org.apache.log4j"))
+      targ =  "edu.berkeley.numberlogs.targ.Log4J";
+    else if(dest.startsWith("org.apache.commons.log"))
+      targ = "edu.berkeley.numberlogs.targ.CommonsLog";
+    
+    if(targ != null && LOG_CALLS.contains(meth)) {
       
 //      System.out.println("editing method call on line "+ line + " to " + dest);
       int id = IDMap.localToGlobal(classHash, posInClass++);
       int nargs = Descriptor.numOfParameters(e.getSignature());
       if(nargs == 1)
-        e.replace("edu.berkeley.numberlogs.NumberedLogging.logmsg("+id +",\""+meth +"\",$0,$1, null);"); 
+        e.replace(targ + ".logmsg("+id +",\""+meth +"\",$0,$1, null);"); 
       else if(nargs == 2)
-        e.replace("edu.berkeley.numberlogs.NumberedLogging.logmsg("+id +",\""+meth +"\",$0,$1,$2);"); 
+        e.replace(targ +".logmsg("+id +",\""+meth +"\",$0,$1,$2);"); 
       else
         System.err.println("Logger call with 3 or more args. Panic!");
-
     }
     
   }
