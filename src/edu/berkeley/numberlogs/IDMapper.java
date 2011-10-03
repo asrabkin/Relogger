@@ -50,18 +50,27 @@ public class IDMapper {
     nextID = maxID + 1;
   }
   
+  
   public synchronized int localToGlobal(String classHash, int posInClass, String classname, int lineno) {
-    String key = classHash + "_" + posInClass; 
-    Integer v = mapping.get(key);
+    String canonicalKey = classHash + "_" + posInClass; 
+    String softKey = classname+":"+lineno;
+    Integer v = mapping.get(canonicalKey);
     if (v == null)  {
       v = nextID++;
-      mapping.put(key, v);
+      mapping.put(canonicalKey, v);
+      mapping.put(softKey, v);
     }
     if(!info.containsKey(v)) {
-      info.put(v, new StmtInfo(key, classname, lineno));
+      mapping.put(softKey, v);
+      info.put(v, new StmtInfo(canonicalKey, classname, lineno));
     }
     return v;
   }
+
+  public synchronized Integer lookup(String s) {
+    return mapping.get(s);
+  }
+
   
   
   public static IDMapper readMap(InputStream in) throws IOException {
@@ -143,5 +152,7 @@ public class IDMapper {
   public synchronized StmtInfo getInfo(int stmtID) {
     return info.get(stmtID);
   }
+
+
 
 }

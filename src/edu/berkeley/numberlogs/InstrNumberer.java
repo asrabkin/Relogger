@@ -107,7 +107,7 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
     IDMapReconciler rec = new IDMapReconciler(outFile, IDMap);
     IDMapReconciler.doDummyWrite(outFile);
     rec.start(); //TODO: is there a race condition if the thread hasn't started before stop?
-    UDPCommandListener ucl = new UDPCommandListener(portno);
+    UDPCommandListener ucl = new UDPCommandListener(portno, IDMap);
     ucl.start();
     Runtime.getRuntime().addShutdownHook(new IDMapReconciler.WriterThread(rec));
     System.out.println("UDP listener alive on port " + ucl.portno);

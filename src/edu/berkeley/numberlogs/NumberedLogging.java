@@ -45,7 +45,7 @@ public class NumberedLogging {
     //Updates both user and cached map table
     userDisabled.set(i, isDisabled);
     userEnabled.set(i, !isDisabled);
-    changeCacheDisable(i, isDisabled); //in theory only necessary if we were enabling.
+    changeCacheDisable(i, isDisabled);
   }
   
 

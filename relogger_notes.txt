@@ -197,3 +197,9 @@ Users might want to disable a statement by file and lineno, without knowing the 
 	This also allows enabling/disabling messages by canonical ID.
 
 Added support for recording messages. Added support for reset-all.
+Added "soft" keys, based on class-name.
+
+Finishing the feature requires handling the case where we have a soft mapping and not a hard mapping.  This is all in the IDMapper, in localToGlobal().
+	What happens if we have a cached hard mapping and the user adds a soft mapping for a not-yet-loaded class?  We'll add a new number for the soft ID. We'll clean this up at class-load time, by overwriting the mapping.  Should copy over the enable-bits for it. Only user-enable can be active, since it'll necessarily never have been printed.
+
+Over time, we can leak IDs, e.g. by caching mappings for code that isn't there. 

@@ -1,4 +1,6 @@
 
+import difflib
+import filecmp
 import glob
 import json
 import logging
@@ -10,6 +12,7 @@ import shutil
 import subprocess
 import sys
 import time
+
 
 from collections import defaultdict
 
@@ -53,6 +56,21 @@ def    test_base():
         for s in base_out[6::3]:
             assert s == '\tat edu.berkeley.BaseTest.main(BaseTest.java:18)', "saw " + s 
         adj += 12
+    
+    filecmp_with_diff('relogger/statement_map', 'relogger_test/basic_statement_map',
+        "ERR: message map doesn't match template.")
+        
+        
+def filecmp_with_diff(fname1, fname2, err):
+    if not filecmp.cmp(fname1, fname2):
+        print err
+        f1 = open(fname1, 'r')
+        f2 = open(fname2, 'r')
+        diffs = difflib.unified_diff(f1.readlines(), f2.readlines())
+        for d in diffs:
+            sys.stdout.write(d)
+        f1.close()
+        f2.close()
 
 def test_persist():
     out1 = run_and_capture_relogged("edu.berkeley.NondeterministicLoad", ["a"])

@@ -6,15 +6,17 @@ import java.net.*;
 public class UDPCommandListener extends Thread {
   
   static final int DEFAULT_PORT = 2345;
+  final IDMapper mapping;
   
   int portno;
-  public UDPCommandListener(int portno) {
+  public UDPCommandListener(int portno, IDMapper mapping) {
+    this.mapping = mapping;
     this.portno = portno;
     this.setDaemon(true);
   }
   
-  public UDPCommandListener() {
-    this(DEFAULT_PORT);
+  public UDPCommandListener(IDMapper mapping) {
+    this(DEFAULT_PORT, mapping);
   }
 
   public void run() {
@@ -40,10 +42,19 @@ public class UDPCommandListener extends Thread {
       String[] words = contents.split("\\s+");
       String cmd = words[0].toLowerCase();
       
-      if(cmd.equals("resetonce")) {
-        NumberedLogging.clearAllPrintedOnce();
-      } else { //per statement command
-        int stmtID = Integer.parseInt(words[1]);
+      if(words.length > 1){ //per statement command
+        int stmtID = 0;
+        try {
+          stmtID = Integer.parseInt(words[1]);
+        } catch(NumberFormatException e) {
+          
+          Integer id = mapping.lookup(words[1]);
+          if(id != null)
+            stmtID = id;
+          else
+            return;
+        }
+        
         if(cmd.equals("up") || cmd.equals("on")) {
           NumberedLogging.updateUser(stmtID, false);
         } else if(cmd.equals("down") || cmd.equals("off")) {
@@ -55,7 +66,11 @@ public class UDPCommandListener extends Thread {
         } else {
           System.err.println("Unknown log-rewrite command " + cmd);
         }
-      }
+      } 
+      if(cmd.equals("resetonce")) {
+        NumberedLogging.clearAllPrintedOnce();
+      } 
+      
     } catch(Exception e) {
       System.out.println("got " + contents);
       e.printStackTrace();
