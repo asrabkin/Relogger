@@ -25,12 +25,105 @@ public class LogPerfTest {
     
   }
   
+  interface TestCase {
+    double test();
+    String name();
+    void warmup();
+  }
+  
+  static class Log4JUnprinted implements TestCase {
+    
+    public void warmup() {}
+    
+    public double test() {
+      long startT = System.currentTimeMillis();
+      for(int i=0; i < RUNS; ++i)
+        LOG.trace("I am a simple log statement");
+      long duration = System.currentTimeMillis() - startT;
+      return duration * 1000 * 1000.0 / RUNS;
+    }
+    
+    public String name() {
+      return "unused Log4J";
+    }    
+  }
+
+  static class JavaUnprinted implements TestCase {
+    
+    public void warmup() {}
+    
+    public double test() {
+      long startT = System.currentTimeMillis();
+      for(int i=0; i < RUNS; ++i)
+        JavaLOG.finer("I am a simple log statement");
+      long duration = System.currentTimeMillis() - startT;
+      return duration * 1000 * 1000.0 / RUNS;
+    }
+    
+    public String name() {
+      return "unused Java.util.log";
+    }    
+  }  
+  
+  static class ApacheUnprinted implements TestCase {
+    
+    public void warmup() {}
+    
+    public double test() {
+      long startT = System.currentTimeMillis();
+      for(int i=0; i < RUNS; ++i)
+        ApacheLOG.trace("I am a simple log statement");
+      long duration = System.currentTimeMillis() - startT;
+      return duration * 1000 * 1000.0 / RUNS;
+    }
+    
+    public String name() {
+      return "unused Apache Commons";
+    }    
+  }
+  
+ static class Log4JPrinted implements TestCase {
+    
+    public void warmup() {
+      WriterAppender bufferAppender = new WriterAppender(new SimpleLayout(), new DummyOutputStream());
+      LOG.removeAllAppenders();
+      LOG.setAdditivity(false);
+      LOG.addAppender(bufferAppender);
+
+      for(int i=0; i < PRINTRUNS; ++i)
+        LOG.info("I am a warmup printing log statement");
+
+      bufferAppender = new WriterAppender(new SimpleLayout(), new DummyOutputStream());
+      LOG.removeAllAppenders();
+      LOG.setAdditivity(false);
+      LOG.addAppender(bufferAppender);
+      System.gc();
+    }
+    
+    public double test() {
+      long startT;
+      long duration;
+      
+      startT = System.currentTimeMillis();
+      for(int i=0; i < PRINTRUNS; ++i)
+        LOG.info("I am a printed log statement");
+      duration = System.currentTimeMillis() - startT;
+      return duration * 1000 * 1000.0 / PRINTRUNS;
+    }
+    
+    public String name() {
+      return "formatted Log4J";
+    }    
+  }
+  
 
   public static final long RUNS = 100* 1000*1000;
   static final int PRINTRUNS = 1000 * 1000 * 10;
   static Logger LOG = Logger.getLogger(LogPerfTest.class);
   static org.apache.commons.logging.Log ApacheLOG =
     org.apache.commons.logging.LogFactory.getLog(LogPerfTest.class);
+  static java.util.logging.Logger JavaLOG;
+  static int numTests = 1;
   /**
    * @param args
    */
@@ -38,10 +131,14 @@ public class LogPerfTest {
   public static void main(String[] args) {
     LOG.setLevel(Level.INFO);
     
-    java.util.logging.Logger JavaLOG = java.util.logging.Logger.getLogger("commons.logger");
+    JavaLOG = java.util.logging.Logger.getLogger("commons.logger");
     
-    if(args.length > 0) {
-      testBitsetCopy();
+    if(args.length > 0)  {
+      if(args[0].equals("bitset")){
+        testBitsetCopy();
+      } else if(args[0].contains("runs=")) {
+        numTests = Integer.parseInt(args[0].split("=")[1]);
+      }
     }
 
     for(int i=0; i < RUNS; ++i) {
@@ -50,63 +147,46 @@ public class LogPerfTest {
       ApacheLOG.trace("So am I");
       JavaLOG.fine("me too!");
     }
+    
+    doTest(new Log4JUnprinted());
+    doTest(new ApacheUnprinted());
+    doTest(new JavaUnprinted());
+    
+    TestCase t = new Log4JPrinted();
+    t.warmup();
+    doTest(t);
 
-    double ns_per_log = testLog4jUnused();
-    System.out.printf("%.2f ns per un-used Log4j log stmt\n", ns_per_log);
-    
-    long startT;
-    long duration;
-    
-    WriterAppender bufferAppender = new WriterAppender(new SimpleLayout(), new DummyOutputStream());
-    LOG.removeAllAppenders();
-    LOG.setAdditivity(false);
-    LOG.addAppender(bufferAppender);
-
-    for(int i=0; i < PRINTRUNS; ++i)
-      LOG.info("I am a warmup printing log statement");
-
-    bufferAppender = new WriterAppender(new SimpleLayout(), new DummyOutputStream());
-    LOG.removeAllAppenders();
-    LOG.setAdditivity(false);
-    LOG.addAppender(bufferAppender);
-    System.gc();
-    
-    startT = System.currentTimeMillis();
-    for(int i=0; i < PRINTRUNS; ++i)
-      LOG.info("I am a printed log statement");
-    duration = System.currentTimeMillis() - startT;
-    ns_per_log = duration * 1000 * 1000.0 / PRINTRUNS;
-    System.out.printf("%.2f ns per formatted Log4j stmt\n", ns_per_log);
-    
-    testApacheUnused();
-    
   }
 
 
 
-  private static void testApacheUnused() {
-    long startT;
-    long duration;
-    double ns_per_log;
-    startT = System.currentTimeMillis();
-    for(int i=0; i < RUNS; ++i)
-      ApacheLOG.trace("I am a simple log statement");
-    duration = System.currentTimeMillis() - startT;
-    ns_per_log = duration * 1000 * 1000.0 / RUNS;
-    System.out.printf("%.2f ns per un-used Commons log stmt\n", ns_per_log);
+  private static void doTest(TestCase test) {
+    double[] runs = new double[numTests];
+    double ns_per_log = 0;
+    for(int i=0; i< numTests; ++i) {
+      runs[i] = test.test();
+      ns_per_log += runs[i] / numTests;
+    }
+        
+    System.out.printf("%.2f ns per %s log stmt\n", ns_per_log, test.name());
+    if(numTests > 1) {
+      double stdDev = getStdDev(runs, ns_per_log);
+      System.out.printf("Standard dev of %d runs is %.2f ns\n", numTests, stdDev);
+    }    
   }
 
 
-  private static double testLog4jUnused() {
-    long startT = System.currentTimeMillis();
-    for(int i=0; i < RUNS; ++i)
-      LOG.trace("I am a simple log statement");
-    long duration = System.currentTimeMillis() - startT;
-    return duration * 1000 * 1000.0 / RUNS;
+
+  private static double getStdDev(double[] runs, double mean) {
+    double variance = 0;
+    for(double d:runs) {
+      double diff = d-mean;
+      variance += diff * diff / runs.length;
+    }
+    return Math.sqrt(variance);
   }
-  
-  
-  
+
+
   private static void testBitsetCopy() {
     int BITSET_RUNS = 1000000;
 

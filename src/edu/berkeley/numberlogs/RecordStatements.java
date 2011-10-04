@@ -30,7 +30,7 @@ public class RecordStatements {
     IDMapper.StmtInfo info = mapper.getInfo(stmtID);
     
     synchronized(out) {
-      out.println(stmtID+ "\t"+info.classname+":"+info.lineno+"\t"+originalMethname+
+      out.println(stmtID+ "\t" +info.canonicalID+ "\t"+info.classname+":"+info.lineno+"\t"+originalMethname+
           "\t" + msg);
       if(ex != null)
         out.println(ex);

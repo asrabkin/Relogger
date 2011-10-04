@@ -203,3 +203,18 @@ Finishing the feature requires handling the case where we have a soft mapping an
 	What happens if we have a cached hard mapping and the user adds a soft mapping for a not-yet-loaded class?  We'll add a new number for the soft ID. We'll clean this up at class-load time, by overwriting the mapping.  Should copy over the enable-bits for it. Only user-enable can be active, since it'll necessarily never have been printed.
 
 Over time, we can leak IDs, e.g. by caching mappings for code that isn't there. 
+
+
+---------
+
+10/2/11: Can cache line number along with canonical ID -- every canonical ID maps uniquely to a soft ID.  But this isn't so useful since we may have multiple equally good but inconsistent soft -->canonical mappings.
+
+Perhaps solve this on the command input side? Cache inapplicable soft mappings, try periodically to reapply?
+
+It may be time to build/test the name-remapping process.  Plan of action:
+   Define canonical file format for map-out. Have jchord code output this. Python script to reconcile two such files. Test on toy example with just a rename -- everything should line up.  Then test with Hadoop, 20 vs CDH3u0. See what fraction match properly. 
+
+---
+Java.util logger has different log method names. Easy to adapt?
+
+

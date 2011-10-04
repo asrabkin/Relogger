@@ -148,6 +148,13 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
           if(cName.startsWith(prefix))
             return null;
       classHash = getHash(classfileBuffer);
+      
+      /*
+      System.out.println("Class" +cName + " has " + classfileBuffer.length + " bytes");
+      System.out.println("First byte is " + classfileBuffer[0]);
+      for(int j =classfileBuffer.length - 5; j < classfileBuffer.length; ++j)
+        System.out.print(" " + classfileBuffer[j]);      
+      System.out.println(); */
       posInClass = 0;
 
       //      System.out.println("trying to transform "+cName);
@@ -174,6 +181,7 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
     MessageDigest md = MessageDigest.getInstance("MD5");
 
     md.update(classfileBuffer, 0, classfileBuffer.length);
+
     byte[] bytes = md.digest();
     for(int i=0; i < bytes.length; ++i) {
       if( (bytes[i] & 0xF0) == 0)
@@ -184,6 +192,11 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
   }
 
   
+  /**
+   * Alphabetize methods.
+   * @author asrabkin
+   *
+   */
   class CtBehaviorComparator implements Comparator<CtBehavior> {
 
     @Override
@@ -202,7 +215,7 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
       edit(m);
     CtBehavior[] meths = clazz.getDeclaredMethods();
 
-      //sort list. This matches static ordering.
+      //sort list alphabetically. This matches static ordering.
     java.util.Arrays.sort(meths, new CtBehaviorComparator());
     
     for (CtBehavior m : meths) {

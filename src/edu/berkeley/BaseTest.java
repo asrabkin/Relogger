@@ -15,7 +15,7 @@ public class BaseTest {
    */
   public static void main(String[] args) {
     
-    Exception e = new IOException("An exception");
+    IOException e = new IOException("An exception");
 
     LOG.fatal("I am fatal");
     LOG.error("I am error");
@@ -35,7 +35,7 @@ public class BaseTest {
 
   }
 
-  private static void commonsLogs(Exception e) {
+  private static void commonsLogs(IOException e) {
     
     
     COMMONS_LOG.fatal("I am fatal");
