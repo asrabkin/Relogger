@@ -201,7 +201,7 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
 
     @Override
     public int compare(CtBehavior o1, CtBehavior o2) {
-      return o1.toString().compareTo(o2.toString());
+      return -o1.toString().compareTo(o2.toString());
     }
   }
 

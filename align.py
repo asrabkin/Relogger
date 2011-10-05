@@ -22,6 +22,8 @@ def main():
         
     f1_as_tuples = read_statement_map(sys.argv[1])
     f2_as_tuples = read_statement_map(sys.argv[2])
+    matchup(f1_as_tuples, f2_as_tuples, sys.argv[1], sys.argv[2])
+    
 
 def read_statement_map(fname):
     f = open(fname, 'r')
@@ -32,6 +34,27 @@ def read_statement_map(fname):
             stmts[canonID] = (sourceLoc, lev, text)
     f.close()
     return stmts
+
+def matchup(f1_messages, f2_messages, f1_name, f2_name):
+    set1 = set(f1_messages.keys())
+    set2 = set(f2_messages.keys())
+    common_keys = set1 & set2
+    print len(common_keys),"canonical IDs common to both"
+    for k in common_keys:
+        loc1 = f1_messages[k][0:1]
+        loc2 = f1_messages[k][0:2]
+        if loc1 != loc2:
+            print "WARN: same canonical ID mapped to both",f1_messages[k],"and",f2_messages[k],"."
+        del f1_messages[k]
+        del f2_messages[k]
+        
+    print "left with %d messages in %s and %d in %s" % \
+       (len(f1_messages), f1_name, len(f2_messages), f2_name)
+    if len(f1_messages) + len(f2_messages) > 0:
+        print f1_messages
+        print "\n versus \n"
+        print f2_messages
+
 
 
 if __name__ == '__main__':

@@ -94,6 +94,9 @@ def test_performance():
     relogged = run_and_capture_relogged("edu.berkeley.LogPerfTest")    
     print "performance with relogger:\t"+ "\n".join(relogged.splitlines()[2:5])
 
+# java -javaagent:numberedlogs.jar -cp numberedlogs.jar:lib/log4j-1.2.15.jar:lib/commons-logging-api-1.0.4.jar:lib/commons-logging-1.0.4.jar:lib/javassist-3.15.0.jar:conf edu.berkeley.BaseTest
+#
+
 AGENT_INJECT="-javaagent:numberedlogs.jar"
 def run_and_capture_relogged(java_main, args=[]):
     return run_and_capture(java_main, args, relogged=True)

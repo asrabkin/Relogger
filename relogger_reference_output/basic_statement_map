@@ -1,0 +1,36 @@
+13	954f6781668a772d0b1456280a179d6e_12	edu.berkeley.BaseTest:20	fatal	I am fatal
+14	954f6781668a772d0b1456280a179d6e_13	edu.berkeley.BaseTest:21	error	I am error
+15	954f6781668a772d0b1456280a179d6e_14	edu.berkeley.BaseTest:22	warn	I am warn
+16	954f6781668a772d0b1456280a179d6e_15	edu.berkeley.BaseTest:23	info	I am info
+17	954f6781668a772d0b1456280a179d6e_16	edu.berkeley.BaseTest:24	debug	I am debug
+18	954f6781668a772d0b1456280a179d6e_17	edu.berkeley.BaseTest:25	trace	I am trace
+19	954f6781668a772d0b1456280a179d6e_18	edu.berkeley.BaseTest:27	fatal	I am fatal
+java.io.IOException: An exception
+20	954f6781668a772d0b1456280a179d6e_19	edu.berkeley.BaseTest:28	error	I am error
+java.io.IOException: An exception
+21	954f6781668a772d0b1456280a179d6e_20	edu.berkeley.BaseTest:29	warn	I am warn
+java.io.IOException: An exception
+22	954f6781668a772d0b1456280a179d6e_21	edu.berkeley.BaseTest:30	info	I am info
+java.io.IOException: An exception
+23	954f6781668a772d0b1456280a179d6e_22	edu.berkeley.BaseTest:31	debug	I am debug
+java.io.IOException: An exception
+24	954f6781668a772d0b1456280a179d6e_23	edu.berkeley.BaseTest:32	trace	I am trace
+java.io.IOException: An exception
+1	954f6781668a772d0b1456280a179d6e_0	edu.berkeley.BaseTest:41	fatal	I am fatal
+2	954f6781668a772d0b1456280a179d6e_1	edu.berkeley.BaseTest:42	error	I am error
+3	954f6781668a772d0b1456280a179d6e_2	edu.berkeley.BaseTest:43	warn	I am warn
+4	954f6781668a772d0b1456280a179d6e_3	edu.berkeley.BaseTest:44	info	I am info
+5	954f6781668a772d0b1456280a179d6e_4	edu.berkeley.BaseTest:45	debug	I am debug
+6	954f6781668a772d0b1456280a179d6e_5	edu.berkeley.BaseTest:46	trace	I am trace
+7	954f6781668a772d0b1456280a179d6e_6	edu.berkeley.BaseTest:48	fatal	I am fatal
+java.io.IOException: An exception
+8	954f6781668a772d0b1456280a179d6e_7	edu.berkeley.BaseTest:49	error	I am error
+java.io.IOException: An exception
+9	954f6781668a772d0b1456280a179d6e_8	edu.berkeley.BaseTest:50	warn	I am warn
+java.io.IOException: An exception
+10	954f6781668a772d0b1456280a179d6e_9	edu.berkeley.BaseTest:51	info	I am info
+java.io.IOException: An exception
+11	954f6781668a772d0b1456280a179d6e_10	edu.berkeley.BaseTest:52	debug	I am debug
+java.io.IOException: An exception
+12	954f6781668a772d0b1456280a179d6e_11	edu.berkeley.BaseTest:53	trace	I am trace
+java.io.IOException: An exception
