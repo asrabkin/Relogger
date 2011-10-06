@@ -218,3 +218,15 @@ It may be time to build/test the name-remapping process.  Plan of action:
 Java.util logger has different log method names. Easy to adapt?
 
 
+
+10/5:
+	Minor problem: matching works badly for BaseTest and SecondBaseTest because we don't include the logger name in the comparison. Probably an artifact of test since real programs only use one logger.
+
+Bigger problem:
+	Multiple canonical names for same logger call in static analysis of Hadoop 18. Example: 
+org.apache.hadoop.ipc.Server$Responder:636      warn    .*,  call .*: output error
+
+----
+
+We had at first tried using the bytecode offset of the logging call as part of the canonical name. This hit difficulties. Java compilers sometimes will duplicate a "finally" block several times in a method. This means that a single function call at the source-code level may be multiplied in the bytecode. Exposing this quirk to users would be inconvenient. It would require them to issue several directives to relogger to disable a single logging call in the source.
+

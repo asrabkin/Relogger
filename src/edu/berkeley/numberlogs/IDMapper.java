@@ -52,7 +52,7 @@ public class IDMapper {
   
   
   public synchronized int localToGlobal(String classHash, int posInClass, String classname, int lineno) {
-    String canonicalKey = classHash + "_" + posInClass; 
+    String canonicalKey = classHash + "_" + lineno; 
     String softKey = classname+":"+lineno;
     Integer v = mapping.get(canonicalKey);
     if (v == null)  {
