@@ -148,9 +148,10 @@ public class LogPerfTest {
       JavaLOG.fine("me too!");
     }
     
-    doTest(new Log4JUnprinted());
-    doTest(new ApacheUnprinted());
-    doTest(new JavaUnprinted());
+    TestCase[] tests = new TestCase[] {new Log4JUnprinted(), new ApacheUnprinted(), 
+      new JavaUnprinted()};
+    for(TestCase t: tests)
+      doTest(t);
     
     TestCase t = new Log4JPrinted();
     t.warmup();
@@ -168,11 +169,12 @@ public class LogPerfTest {
       ns_per_log += runs[i] / numTests;
     }
         
-    System.out.printf("%.2f ns per %s log stmt\n", ns_per_log, test.name());
+    System.out.printf("-- %s avg = %.2f ns\t", test.name(), ns_per_log);
     if(numTests > 1) {
       double stdDev = getStdDev(runs, ns_per_log);
-      System.out.printf("Standard dev of %d runs is %.2f ns\n", numTests, stdDev);
-    }    
+      System.out.printf("stddev = %.2f ns\n", stdDev);
+    } else
+      System.out.println();
   }
 
 

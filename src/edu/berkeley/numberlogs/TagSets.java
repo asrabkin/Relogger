@@ -22,7 +22,7 @@ public class TagSets {
     }
   }
   
-  protected HashMap<String, TagSet> tagsByName;
+  protected HashMap<String, TagSet> tagsByName = new HashMap<String, TagSet>(10);
   
   public synchronized TagSet get(String s) {
     return tagsByName.get(s);

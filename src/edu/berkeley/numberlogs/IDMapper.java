@@ -129,7 +129,7 @@ public class IDMapper {
         }
         if( globalID > nextID)
           nextID = globalID + 1;
-        for(int tagno=0; tagno < p.length; ++tagno)
+        for(int tagno=2; tagno < p.length; ++tagno)
           ts.tag(p[tagno], globalID);
       }
     } catch(Exception e) {

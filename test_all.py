@@ -33,8 +33,13 @@ def main():
     print "......ok"
     print "Running second test: persistance"
     test_persist()
+
     print "Doing performance test"
-    test_performance()
+    
+    if len(sys.argv) > 1 and "perftable" in sys.argv[1]:
+        detailed_performance()
+    else:
+        test_performance()
 
 levels = ['fatal', 'error', 'warn', 'info']
 
@@ -94,8 +99,58 @@ def test_performance():
     relogged = run_and_capture_relogged("edu.berkeley.numberlogs.test.LogPerfTest")    
     print "performance with relogger:\t"+ "\n".join(relogged.splitlines()[2:5])
 
+
+
+unrelogged_txt="""-- unused Log4J avg = 3.98 ns	stddev = 0.11 ns
+-- unused Apache Commons avg = 5.54 ns	stddev = 0.09 ns
+-- unused Java.util.log avg = 2.05 ns	stddev = 0.05 ns
+-- formatted Log4J avg = 620.70 ns	stddev = 7.86 ns
+"""
+relogged_txt="""UDP listener alive on port 2345
+-- unused Log4J avg = 2.74 ns	stddev = 0.08 ns
+-- unused Apache Commons avg = 2.70 ns	stddev = 0.02 ns
+-- unused Java.util.log avg = 1.91 ns	stddev = 0.01 ns
+-- formatted Log4J avg = 992.80 ns	stddev = 15.68 ns
+RELOGGER triggering write on exit"""
+
+PERF_LINE_RE = re.compile("-- ([^ ]+) (.*) avg = ([0-9\.]+) ns	stddev = ([0-9\.]+) ns")
+RUNS = "runs=20"
+def detailed_performance():
+    unrelogged_txt =  run_and_capture("edu.berkeley.numberlogs.test.LogPerfTest", args=[RUNS])
+    perf_table_without = get_perftable(unrelogged_txt)
+    print "Ran without relogger. Now running with..."
+    relogged_txt = run_and_capture_relogged("edu.berkeley.numberlogs.test.LogPerfTest", args=[RUNS])
+    perf_table_with = get_perftable(relogged_txt)
+    print "...OK\n\n"
+    
+    for (k,(avg,dev)) in sorted(perf_table_without.items()):
+        (fmt,logger) = k
+        avg_with,dev_with = perf_table_with[k]
+        print "%s & %s & %0.2f & %0.2f & %0.2f & %0.2f \\\\" % \
+            (logger, fmt, avg,dev, avg_with,dev_with)
+        print "\hline"
+    print "\n\nEND"
+
+
+def get_perftable(cmd_out):
+    table = {}
+    for ln in cmd_out.splitlines():
+        m = PERF_LINE_RE.search(ln)
+        if m:
+            fmt = m.group(1)
+            fmt = "Yes" if 'formatted' in fmt else 'No'
+            logger = m.group(2)
+            avg = float(m.group(3))
+            stddev = float(m.group(4))
+            table[ (fmt,logger) ] = (avg,stddev)
+        elif "-- " in ln:
+            print "UNMATCHED",ln
+    return table
+
+
 # java -javaagent:numberedlogs.jar -cp numberedlogs.jar:lib/log4j-1.2.15.jar:lib/commons-logging-api-1.0.4.jar:lib/commons-logging-1.0.4.jar:lib/javassist-3.15.0.jar:conf edu.berkeley.BaseTest
-#
+
+
 
 AGENT_INJECT="-javaagent:numberedlogs.jar"
 def run_and_capture_relogged(java_main, args=[]):
