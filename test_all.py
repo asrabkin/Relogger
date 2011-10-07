@@ -39,25 +39,25 @@ def main():
 levels = ['fatal', 'error', 'warn', 'info']
 
 def    test_base():
-    out = run_and_capture_relogged("edu.berkeley.BaseTest").splitlines()
+    out = run_and_capture_relogged("edu.berkeley.numberlogs.test.BaseTest").splitlines()
     out = out[2:] #drop prolog
     
-    adj = 0
+    adj = 12
     for base_out in (out[0:16], out[16:32]):
         for i,lev in zip(range(1,4), levels):
             expected = "%s main BaseTest - (%d) I am %s" % (lev.upper(), i + adj, lev)
-            assert base_out[i-1].endswith(expected), "saw %s" % base_out[i-1]
+            assert base_out[i-1].endswith(expected), "saw %s" % base_out[i-1] + " but expected "+ expected
     
         for s,i,lev in zip(base_out[4::3], range(7,10), levels):
             expected = "%s main BaseTest - (%d) I am %s" % (lev.upper(), i + adj, lev)
-            assert s.endswith(expected), "saw " + s
+            assert s.endswith(expected), "saw " + s + " but expected "+ expected
         for s in base_out[5::3]:
             assert s == "java.io.IOException: An exception", "saw " + s
         for s in base_out[6::3]:
-            assert s == '\tat edu.berkeley.BaseTest.main(BaseTest.java:18)', "saw " + s 
-        adj += 12
+            assert s == '\tat edu.berkeley.numberlogs.test.BaseTest.main(BaseTest.java:18)', "saw " + s 
+        adj -= 12
     
-    filecmp_with_diff('relogger/statement_map', 'relogger_test/basic_statement_map',
+    filecmp_with_diff('relogger/statement_map', 'relogger_reference_output/basic_statement_map',
         "ERR: message map doesn't match template.")
         
         
@@ -73,9 +73,9 @@ def filecmp_with_diff(fname1, fname2, err):
         f2.close()
 
 def test_persist():
-    out1 = run_and_capture_relogged("edu.berkeley.NondeterministicLoad", ["a"])
+    out1 = run_and_capture_relogged("edu.berkeley.numberlogs.test.NondeterministicLoad", ["a"])
     print "...ran once"
-    output = run_and_capture_relogged("edu.berkeley.NondeterministicLoad", ["b"])
+    output = run_and_capture_relogged("edu.berkeley.numberlogs.test.NondeterministicLoad", ["b"])
     
     if "(4) I am class B" in output:
         print "......ok"
@@ -89,9 +89,9 @@ def test_persist():
         
         
 def test_performance():
-    unrelogged =  run_and_capture("edu.berkeley.LogPerfTest")
+    unrelogged =  run_and_capture("edu.berkeley.numberlogs.test.LogPerfTest")
     print "performance without relogger:\t"+ unrelogged
-    relogged = run_and_capture_relogged("edu.berkeley.LogPerfTest")    
+    relogged = run_and_capture_relogged("edu.berkeley.numberlogs.test.LogPerfTest")    
     print "performance with relogger:\t"+ "\n".join(relogged.splitlines()[2:5])
 
 # java -javaagent:numberedlogs.jar -cp numberedlogs.jar:lib/log4j-1.2.15.jar:lib/commons-logging-api-1.0.4.jar:lib/commons-logging-1.0.4.jar:lib/javassist-3.15.0.jar:conf edu.berkeley.BaseTest
@@ -109,6 +109,7 @@ def run_and_capture(java_main, args=[], relogged=False):
     cmd_array.extend(args)
     p = subprocess.Popen(cmd_array, stdout=subprocess.PIPE, stderr=None)
     (output, err) = p.communicate()
+#    print output
     return output
 
 def get_libs():

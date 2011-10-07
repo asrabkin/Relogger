@@ -228,5 +228,15 @@ org.apache.hadoop.ipc.Server$Responder:636      warn    .*,  call .*: output err
 
 ----
 
-We had at first tried using the bytecode offset of the logging call as part of the canonical name. This hit difficulties. Java compilers sometimes will duplicate a "finally" block several times in a method. This means that a single function call at the source-code level may be multiplied in the bytecode. Exposing this quirk to users would be inconvenient. It would require them to issue several directives to relogger to disable a single logging call in the source.
 
+--
+10/6:
+	Need to be clear on whether there's a statement zero. Leaning against since it means we can have a "no statement" field. Useful for, e.g., having a growable int[] list of messages with a tag
+	Should have default tags; by file and by priority. 
+	How do we avoid re-tagging already tagged entries?  Would rather have list than set data structure. 
+
+
+What happens if we have both an existing canonical-to-num mapping and also a relocation table? Should use existing map first, then relocate.
+
+
+Tags should be in the mapping file -- read in the same place, and useful to store there. 

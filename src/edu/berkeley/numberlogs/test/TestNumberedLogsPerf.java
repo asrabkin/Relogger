@@ -1,4 +1,4 @@
-package edu.berkeley.numberlogs;
+package edu.berkeley.numberlogs.test;
 
 import org.apache.log4j.Logger;
 import edu.berkeley.numberlogs.targ.Log4J;

@@ -32,11 +32,13 @@ public class IDMapper {
   int nextID = 1;
   public static final File DEFAULT_MAPPING = new File("relogger/mapping.out");
 
-  Map<String,Integer> mapping;
-  Map<Integer, StmtInfo> info; //info about each canonical-number
+  Map<String,Integer> mapping; //forward mapping canonical to number
+  Map<Integer, StmtInfo> info; //back map: info about each canonical-number
+  Map<String,String> relocationTable; //canonical[newer] to canonical [older]
   
   public IDMapper() {
     this.mapping = new HashMap<String,Integer>(100);
+    this.relocationTable = new HashMap<String, String>(100);
     this.info = new HashMap<Integer, StmtInfo>(100);
   }
 
@@ -50,27 +52,51 @@ public class IDMapper {
     nextID = maxID + 1;
   }
   
-  
+  /**
+   * Called once per program run, at load time.
+   * @param classHash
+   * @param posInClass
+   * @param classname
+   * @param lineno
+   * @return
+   */
   public synchronized int localToGlobal(String classHash, int posInClass, String classname, int lineno) {
     String canonicalKey = classHash + "_" + lineno; 
     String softKey = classname+":"+lineno;
     Integer v = mapping.get(canonicalKey);
-    if (v == null)  {
-      v = nextID++;
-      mapping.put(canonicalKey, v);
-      mapping.put(softKey, v);
+
+  //step backwards through relocation table until we either find a mapping or run
+  //out of relocation table.
+    String reloc = canonicalKey;
+    while(v == null && reloc != null) {
+      reloc = relocationTable.get(reloc);
+      v = mapping.get(reloc);
     }
-    if(!info.containsKey(v)) {
+    
+    if (v == null)  { //no mapping found. Note that Relocation mappings are NOT this case.
+      v = nextID++;
+      mapping.put(canonicalKey, v);//Note this is the true canonical ID, not relocated.
+    }
+    
+    if(!info.containsKey(v)) {//FIXME: can this ever NOT happen? 
       mapping.put(softKey, v);
       info.put(v, new StmtInfo(canonicalKey, classname, lineno));
     }
     return v;
   }
 
+  /**
+   * Check whether we have a mapping for the specified canonical or soft ID.
+   * @param s
+   * @return
+   */
   public synchronized Integer lookup(String s) {
     return mapping.get(s);
   }
 
+  public synchronized StmtInfo getInfo(int stmtID) {
+    return info.get(stmtID);
+  }
   
   
   public static IDMapper readMap(InputStream in) throws IOException {
@@ -103,6 +129,8 @@ public class IDMapper {
         }
         if( globalID > nextID)
           nextID = globalID + 1;
+        for(int tagno=0; tagno < p.length; ++tagno)
+          ts.tag(p[tagno], globalID);
       }
     } catch(Exception e) {
       System.err.println("Err; failure on line '" + ln+"'");
@@ -149,10 +177,7 @@ public class IDMapper {
     
   }
 
-  public synchronized StmtInfo getInfo(int stmtID) {
-    return info.get(stmtID);
-  }
 
-
+  public final TagSets ts = new TagSets();
 
 }

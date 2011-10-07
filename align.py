@@ -70,6 +70,7 @@ def matchup(f1_messages, f2_messages, f1_name, f2_name):
     
     f2_invert_as_strs = dict( [(" ".join(val), k) for (k,val) in f2_messages.items() ]  )
     f2_strs = set(f2_invert_as_strs.keys())
+    matches = 0
     for (k, v1) in f1_messages.items():
         v1_str = " ".join(v1)
         
@@ -77,8 +78,9 @@ def matchup(f1_messages, f2_messages, f1_name, f2_name):
         if len(best_match_list) > 0:
             best_match = best_match_list[0]
             f2_strs.remove(best_match)
-            print "tentatively matching",v1_str,"with",best_match
-       
+            print matches,"-- Tentatively matching",v1_str,"with",best_match
+            matches += 1
+    print "total of",matches,"approximate matches" 
 #    if len(f1_messages) + len(f2_messages) > 0:
 #        print f1_messages
 #        print "\n versus \n"

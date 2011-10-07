@@ -1,14 +1,18 @@
-package edu.berkeley;
+package edu.berkeley.numberlogs.test;
 
 import java.io.IOException;
+import org.apache.log4j.Logger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.Log4JLogger;
-import org.apache.log4j.Logger;
 
-public class SecondBaseTest {
+public class BaseTest {
+
   static Logger LOG = Logger.getLogger(BaseTest.class);
   static Log COMMONS_LOG = new Log4JLogger(LOG);
 
+  /**
+   * @param args
+   */
   public static void main(String[] args) {
     
     IOException e = new IOException("An exception");
@@ -48,4 +52,5 @@ public class SecondBaseTest {
     COMMONS_LOG.debug("I am debug", e);
     COMMONS_LOG.trace("I am trace", e);
   }
+
 }

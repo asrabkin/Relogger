@@ -145,10 +145,10 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
 
     try {
       for(String prefix: excludePrefixes)
-          if(cName.startsWith(prefix))
+          if(cName.startsWith(prefix) && !cName.startsWith("edu.berkeley.numberlogs.test"))
             return null;
       classHash = getHash(classfileBuffer);
-      
+//      System.out.println("Working on class " + cName);
       /*
       System.out.println("Class" +cName + " has " + classfileBuffer.length + " bytes");
       System.out.println("First byte is " + classfileBuffer[0]);

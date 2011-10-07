@@ -1,4 +1,4 @@
-package edu.berkeley;
+package edu.berkeley.numberlogs.test;
 
 import java.util.Random;
 import org.apache.log4j.Logger;
