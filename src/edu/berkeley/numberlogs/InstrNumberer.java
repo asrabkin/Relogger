@@ -92,20 +92,17 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
     addClasspathElems(System.getProperty("sun.boot.class.path"));
     addClasspathElems(System.getProperty("java.class.path"));
     
-    if(outFile.exists()) {
-      try { 
-        InputStream in = new FileInputStream(outFile);
-        IDMap = IDMapper.readMap(in);
-        in.close();
-      } catch(IOException e) {
-        e.printStackTrace();
-        IDMap = new IDMapper();
-      }
-    } else
-      IDMap = new IDMapper();
-    RecordStatements.init(outFile.getParentFile(), IDMap);
-    IDMapReconciler rec = new IDMapReconciler(outFile, IDMap);
     IDMapReconciler.doDummyWrite(outFile);
+
+    IDMap = new IDMapper();
+    IDMapReconciler rec = new IDMapReconciler(outFile, IDMap);
+    try {
+      if(outFile.exists())
+        rec.readMap();
+    } catch(IOException e) {
+      e.printStackTrace();
+    }
+    RecordStatements.init(outFile.getParentFile(), IDMap);
     rec.start(); //TODO: is there a race condition if the thread hasn't started before stop?
     UDPCommandListener ucl = new UDPCommandListener(portno, IDMap);
     ucl.start();
@@ -131,7 +128,7 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
   protected CtBehavior currentMethod;
   int posInClass;
   String classHash;
-  public synchronized byte[] transform(ClassLoader loader, String className,
+  public byte[] transform(ClassLoader loader, String className,
       Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
       byte[] classfileBuffer) throws IllegalClassFormatException {
     // Note from javadoc:
@@ -157,18 +154,21 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
       System.out.println(); */
       posInClass = 0;
 
-      //      System.out.println("trying to transform "+cName);
-    
-      CtClass inputClass = pool.makeClass(new ByteArrayInputStream(classfileBuffer));
-      CtClass transformed = edit(inputClass);
-
-      if (transformed != null) {
-        return transformed.toBytecode();
+//      System.out.println("trying to transform "+cName);
+      synchronized(this) {
+        CtClass inputClass = pool.makeClass(new ByteArrayInputStream(classfileBuffer));
+        CtClass transformed = edit(inputClass);
+        if (transformed != null) {
+          return transformed.toBytecode();
+        }
       }
     } catch (IOException e) {
       e.printStackTrace();
     } catch (CannotCompileException e) {
-      System.out.println("Failure working on " + cName);
+      if(currentMethod != null)
+        System.out.println("Failure working on " + cName + "." + currentMethod.getName());
+      else
+        System.out.println("Failure working on " + cName );
       e.printStackTrace();
     } catch (NoSuchAlgorithmException e) {
       e.printStackTrace();
@@ -244,7 +244,7 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
     if(targ != null && LOG_CALLS.contains(meth)) {
       
 //      System.out.println("editing method call on line "+ line + " to " + dest);
-      int id = IDMap.localToGlobal(classHash, posInClass++, currentClass.getName(), line);
+      int id = IDMap.localToGlobal(classHash, posInClass++, currentClass.getName(), line, meth);
       int nargs = Descriptor.numOfParameters(e.getSignature());
       if(nargs == 1)
         e.replace(targ + ".logmsg("+id +",\""+meth +"\",$0,$1, null);"); 

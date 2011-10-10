@@ -39,18 +39,12 @@ public class Log4J extends NumberedLogging {
       Level level = Level.toLevel(methname.toString());*/
 
       String logname = log.getName();
-/*      StringBuilder sb = new StringBuilder(logname.length() + 10);
-      sb.append(logname);
-      sb.append(" (");
-      sb.append(id);
-      sb.append(")");
-      logname = sb.toString();*/
+//taggedID(id)+
       log.callAppenders(
-           new org.apache.log4j.spi.LoggingEvent(logname, log, level, "("+id+") "+msg, ex));
+           new org.apache.log4j.spi.LoggingEvent(logname, log, level, "(" + id + ") "+ msg, ex));
     }
     if( (printResult & RECORD_OUT) != 0)
       RecordStatements.record(id, original_methname, msg, ex);
   }
-
 
 }

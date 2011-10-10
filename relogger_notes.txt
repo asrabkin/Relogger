@@ -238,5 +238,20 @@ org.apache.hadoop.ipc.Server$Responder:636      warn    .*,  call .*: output err
 
 What happens if we have both an existing canonical-to-num mapping and also a relocation table? Should use existing map first, then relocate.
 
-
 Tags should be in the mapping file -- read in the same place, and useful to store there. 
+
+
+10/7:
+	BUG:  We changed to writing mapping file from "info", not from the forward-map.  This means we need infos for every statement, not just the ones that were used. This requires recording class names in mapping file. This is redundant but harmless.
+
+
+Think I fixed the race condition -- problem was reading-on-startup without lock and/or unlocking before closing file.
+
+New problem:
+	what if an enabled log statmeent is protected by isDebugEnabled?  Possible fix:  patch stmt to "is next log statement enabled"?
+
+Should do tagging. Esp. including by previous methname.  Need to write out.
+
+
+-----
+Relocation tables seem to work?

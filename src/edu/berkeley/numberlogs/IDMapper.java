@@ -2,6 +2,7 @@ package edu.berkeley.numberlogs;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.*;
 import java.io.*;
 
@@ -20,11 +21,18 @@ public class IDMapper {
     public String canonicalID;
     public String classname;
     public int lineno;
+    List <String> tags;
     
     public StmtInfo(String canonicalID, String classname, int lineno) {
       this.canonicalID = canonicalID;
       this.classname = classname;
       this.lineno = lineno;
+      tags = new LinkedList<String>();
+    }
+
+    public void addTag(String t) {
+      if(!tags.contains(t))
+        tags.add(t);
     }
     
   }
@@ -39,7 +47,7 @@ public class IDMapper {
   public IDMapper() {
     this.mapping = new HashMap<String,Integer>(100);
     this.relocationTable = new HashMap<String, String>(100);
-    this.info = new HashMap<Integer, StmtInfo>(100);
+    this.info = new LinkedHashMap<Integer, StmtInfo>(100);
   }
 
   
@@ -60,7 +68,8 @@ public class IDMapper {
    * @param lineno
    * @return
    */
-  public synchronized int localToGlobal(String classHash, int posInClass, String classname, int lineno) {
+  public synchronized int localToGlobal(String classHash, int posInClass, String classname, int lineno,
+      String methname) {
     String canonicalKey = classHash + "_" + lineno; 
     String softKey = classname+":"+lineno;
     Integer v = mapping.get(canonicalKey);
@@ -77,10 +86,12 @@ public class IDMapper {
       v = nextID++;
       mapping.put(canonicalKey, v);//Note this is the true canonical ID, not relocated.
     }
+    mapping.put(softKey, v);
     
-    if(!info.containsKey(v)) {//FIXME: can this ever NOT happen? 
-      mapping.put(softKey, v);
-      info.put(v, new StmtInfo(canonicalKey, classname, lineno));
+    if(!info.containsKey(v)) {//FIXME: can this ever happen if v was non-null?
+      StmtInfo stmt = new StmtInfo(canonicalKey, classname, lineno);
+      info.put(v, stmt);
+      stmt.addTag(methname);
     }
     return v;
   }
@@ -123,18 +134,25 @@ public class IDMapper {
         
         String[] p = ln.split(" ");
         int globalID = Integer.parseInt(p[1]);
+        StmtInfo stmt;
         if(!mapping.containsKey(p[0])) {
           mapping.put(p[0], globalID);
+          stmt = new StmtInfo(p[0], p[2], globalID);
+          info.put(globalID, stmt);
           madeChange = true;
-        }
+        } else
+          stmt = info.get(globalID);
         if( globalID > nextID)
           nextID = globalID + 1;
-        for(int tagno=2; tagno < p.length; ++tagno)
+        for(int tagno=3; tagno < p.length; ++tagno) {
           ts.tag(p[tagno], globalID);
+          stmt.addTag(p[tagno]);
+        }
       }
     } catch(Exception e) {
       System.err.println("Err; failure on line '" + ln+"'");
       e.printStackTrace();
+      Runtime.getRuntime().halt(1);
     }
     
     return madeChange;
@@ -143,10 +161,18 @@ public class IDMapper {
   public synchronized int writeMap(OutputStream rawOut) {
     PrintStream ps = new PrintStream(rawOut);
     
-    for( Map.Entry<String, Integer> e: mapping.entrySet()) {
+    for( Map.Entry<Integer, StmtInfo> e: info.entrySet()) {
+      StmtInfo stmt = e.getValue();
+//      if(stmt.canonicalID.length() < 2)
+      ps.print(stmt.canonicalID);
+      ps.print(' ');
       ps.print(e.getKey());
       ps.print(' ');
-      ps.print(e.getValue());
+      ps.print(stmt.classname);
+      for(String tag: stmt.tags) {
+        ps.print(' ');
+        ps.print(tag);
+      }
       ps.println();
     }
     ps.flush();
@@ -179,5 +205,25 @@ public class IDMapper {
 
 
   public final TagSets ts = new TagSets();
+
+  public void readRelocationTables(File reloggerDir) throws IOException {
+    for(File f: reloggerDir.listFiles()) {
+      if(f.getName().startsWith("relocation")) {
+        FileInputStream fis = new FileInputStream(f);
+        BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+        readRelocation(br);
+        br.close();
+      }
+    }
+  }
+
+
+  private void readRelocation(BufferedReader in) throws IOException {
+    String s = "";
+    while( (s= in.readLine()) != null) {
+      String[] parts = s.split(" ");
+      relocationTable.put(parts[0], parts[1]);
+    }
+  }
 
 }

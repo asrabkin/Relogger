@@ -5,11 +5,12 @@ ant
 export JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Versions/1.6.0/Home
 HADOOP=/Users/asrabkin/workspace/hadoop-0.20.2
 
+CONFDIR=hadoop_conf
+
 export HADOOP_OPTS="-javaagent:numberedlogs.jar"
-export HADOOP_CLASSPATH=lib/javassist-3.15.0.jar
+export HADOOP_CLASSPATH=lib/javassist-3.15.0.jar:$CONFDIR
 
 #HADOOP=/Users/asrabkin/Documents/cloudera/hadoop-0.20.2-cdh3u0
-CONFDIR=hadoop_conf
 
 echo "JAVA_HOME is $JAVA_HOME"
 TESTNAME=MapRed-WC
@@ -28,12 +29,12 @@ if !(ps aux | grep namenode | grep -vq 'grep')
 then
   echo "No Hadoop HDFS running. Formatting FS..."
   $HADOOP/bin/hadoop --config $CONFDIR namenode -format > $TESTNAME/nn_format.log 2>&1
-  echo "Format done. Starting nodes."
+  echo "Format done. Starting workers."
   ($HADOOP/bin/hadoop --config $CONFDIR namenode > $TESTNAME/nn.log 2>&1) &
   ($HADOOP/bin/hadoop --config $CONFDIR datanode > $TESTNAME/dn.log 2>&1) &
   ($HADOOP/bin/hadoop --config $CONFDIR secondarynamenode > $TESTNAME/2nn.log 2>&1) &
 
-  sleep 10
+  sleep 15  #wait for FS to come up before doing copy
 
 else
   echo "Namenode apparently running. yay!"
@@ -46,7 +47,7 @@ echo "starting JT and TT; expect a 20 second pause. Showing console from FS clie
 ($HADOOP/bin/hadoop --config $CONFDIR tasktracker > $TESTNAME/tt.log 2>&1) &
 $HADOOP/bin/hadoop --config $CONFDIR fs -copyFromLocal /etc/shells /tmpshells 2>&1 | tee -a $TESTNAME/client.log 
 
-sleep 20
+sleep 20 #wait
 
 if !(ps aux | grep JobTracker | grep -vq 'grep'); then
 echo "JT didn't start"

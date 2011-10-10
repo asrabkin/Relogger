@@ -36,7 +36,7 @@ public class TagSets {
     TagSet t = tagsByName.get(tagSetName);
     if(t == null) {
       t = new TagSet();
-       tagsByName.put(tagSetName, t);
+      tagsByName.put(tagSetName, t);
     }
     t.add(ID);
   }

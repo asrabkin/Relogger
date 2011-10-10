@@ -130,6 +130,14 @@ public class NumberedLogging {
   //Any user-disable was merged into the cache-disable mask.
     return LOG_OUT | returnV; 
   }
+  
+  static String[] tags = new String[2000];
+  protected static String taggedID(int id) {
+    if(tags[id] == null) {
+      tags[id] = "(" + id + ") ";
+    }
+    return tags[id];
+  }
 
 
   public static String reformatArray(Object[] arr) {

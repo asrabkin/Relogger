@@ -33,7 +33,11 @@ public class LogPerfTest {
   
   static class Log4JUnprinted implements TestCase {
     
-    public void warmup() {}
+    public void warmup() {
+      for(int i=0; i < RUNS; ++i) {
+        LOG.isTraceEnabled();
+      }
+    }
     
     public double test() {
       long startT = System.currentTimeMillis();
@@ -50,7 +54,12 @@ public class LogPerfTest {
 
   static class JavaUnprinted implements TestCase {
     
-    public void warmup() {}
+    public void warmup() {
+      for(int i=0; i < RUNS; ++i) {
+        JavaLOG.getLevel();
+        JavaLOG.fine("me too!");
+      }
+    }
     
     public double test() {
       long startT = System.currentTimeMillis();
@@ -67,7 +76,13 @@ public class LogPerfTest {
   
   static class ApacheUnprinted implements TestCase {
     
-    public void warmup() {}
+    public void warmup() {
+      for(int i=0; i < RUNS; ++i) {
+        ApacheLOG.isTraceEnabled();
+        ApacheLOG.trace("So am I");
+      }
+
+    }
     
     public double test() {
       long startT = System.currentTimeMillis();
@@ -116,6 +131,31 @@ public class LogPerfTest {
     }    
   }
   
+ static class ApachePrinted implements TestCase {
+   
+   public void warmup() {
+     //Underlying log4j is still set up
+     for(int i=0; i < PRINTRUNS; ++i)
+       ApacheLOG.info("I am a warmup printing log statement");
+     System.gc();
+   }
+   
+   public double test() {
+     long startT;
+     long duration;
+     
+     startT = System.currentTimeMillis();
+     for(int i=0; i < PRINTRUNS; ++i)
+       ApacheLOG.info("I am a printed log statement");
+     duration = System.currentTimeMillis() - startT;
+     return duration * 1000 * 1000.0 / PRINTRUNS;
+   }
+   
+   public String name() {
+     return "formatted Apache";
+   }    
+ }
+ 
 
   public static final long RUNS = 100* 1000*1000;
   static final int PRINTRUNS = 1000 * 1000 * 10;
@@ -141,21 +181,18 @@ public class LogPerfTest {
       }
     }
 
-    for(int i=0; i < RUNS; ++i) {
-      LOG.isTraceEnabled();
-      LOG.trace("I am a warmup log statement");
-      ApacheLOG.trace("So am I");
-      JavaLOG.fine("me too!");
-    }
+    TestCase[] tests = new TestCase[] { 
+        new JavaUnprinted(), 
+        new Log4JUnprinted(), 
+        new ApacheUnprinted(), 
+        new Log4JPrinted(), 
+        new ApachePrinted()
+    };
     
-    TestCase[] tests = new TestCase[] {new Log4JUnprinted(), new ApacheUnprinted(), 
-      new JavaUnprinted()};
-    for(TestCase t: tests)
+    for(TestCase t: tests) {
+      t.warmup(); 
       doTest(t);
-    
-    TestCase t = new Log4JPrinted();
-    t.warmup();
-    doTest(t);
+    }
 
   }
 

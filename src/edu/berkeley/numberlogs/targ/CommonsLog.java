@@ -59,39 +59,39 @@ public class CommonsLog extends NumberedLogging {
   }
   public static void commonsLog_fatal(Log log, int id, Object msg, Throwable ex) {
     if(ex == null) 
-      log.fatal("(" + id + ") " +msg);
+      log.fatal(taggedID(id) +msg);
     else
-      log.fatal("(" + id + ") " +msg, ex);
+      log.fatal(taggedID(id)+msg, ex);
   }
   public static void commonsLog_error(Log log, int id, Object msg, Throwable ex) {
     if(ex == null) 
-      log.error("(" + id + ") " +msg);
+      log.error(taggedID(id)+msg);
     else
-      log.error("(" + id + ") " +msg, ex);
+      log.error(taggedID(id)+msg, ex);
   }
   public static void commonsLog_warn(Log log, int id, Object msg, Throwable ex) {
     if(ex == null) 
-      log.warn("(" + id + ") " +msg);
+      log.warn(taggedID(id)+msg);
     else
-      log.warn("(" + id + ") " +msg, ex);
+      log.warn(taggedID(id)+msg, ex);
   }
   public static void commonsLog_info(Log log, int id, Object msg, Throwable ex) {
     if(ex == null) 
-      log.info("(" + id + ") " +msg);
+      log.info(taggedID(id)+msg);
     else
-      log.info("(" + id + ") " +msg, ex);
+      log.info(taggedID(id)+msg, ex);
   }
   public static void commonsLog_debug(Log log, int id, Object msg, Throwable ex) {
     if(ex == null) 
-      log.debug("(" + id + ") " +msg);
+      log.debug(taggedID(id)+msg);
     else
-      log.debug("(" + id + ") " +msg, ex);
+      log.debug(taggedID(id)+msg, ex);
   }
   public static void commonsLog_trace(Log log, int id, Object msg, Throwable ex) {
     if(ex == null) 
-      log.trace("(" + id + ") " +msg);
+      log.trace(taggedID(id)+msg);
     else
-      log.trace("(" + id + ") " +msg, ex);
+      log.trace(taggedID(id)+msg, ex);
   }
 
   

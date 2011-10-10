@@ -12,7 +12,7 @@ import java.util.Random;;
  */
 public class IDMapReconciler extends Thread {
   
-  public static int POLL_INTERVAL_MS = 5000;
+  public static int POLL_INTERVAL_MS = 2000;
   public volatile boolean running = true;
   final File canonicalMappingFile;
   final IDMapper mapping;
@@ -49,6 +49,7 @@ public class IDMapReconciler extends Thread {
           FileLock lock = mapF.getChannel().tryLock();
           if(lock == null) {
 //            relogger_log("FAILED TO GET LOCK");
+            mapF.close();
             continue;
           }
 //          else 
@@ -60,14 +61,15 @@ public class IDMapReconciler extends Thread {
             FileOutputStream out = new FileOutputStream(mapF.getFD());
             latestMapSize = mapping.writeMap(out);
 //            relogger_log("Did write");
-//          mapF.setLength(mapF.getFilePointer());
+            mapF.setLength(mapF.getFilePointer());
+            out.flush();
           }
 
           prevModified = canonicalMappingFile.lastModified();
           prevLen = canonicalMappingFile.length();
           prevMapSize = latestMapSize;
-
-          lock.release();
+          
+//          lock.release();
 //          relogger_log("RELEASED LOCK");
           mapF.close();
         } 
@@ -128,11 +130,33 @@ public class IDMapReconciler extends Thread {
       fos.getChannel(); //trigger a class load
       fos.getFD(); //trigger a class load
       IDMapper dummyMapper = new IDMapper();
-      dummyMapper.localToGlobal(" ", 1, "dummyclassname", 1);
+      dummyMapper.localToGlobal("xyzdummyhash", 1, "dummyclassname", 1, "meth");
+      dummyMapper.ts.tag("atag", 1);
       dummyMapper.writeMap(fos);
+      
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      dummyMapper.writeMap(baos);
+      ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+      dummyMapper.readAndUpdate(bais);
       fos.close();
     } catch (IOException e) {
     }
+  }
+
+  public void readMap() throws IOException {
+    mapping.readRelocationTables(canonicalMappingFile.getParentFile());
+    RandomAccessFile mapF = new RandomAccessFile(canonicalMappingFile, "r");
+    FileLock lock = mapF.getChannel().lock(0, Long.MAX_VALUE, true);
+    if(lock == null) {
+//      relogger_log("FAILED TO GET LOCK");
+      mapF.close();
+    }
+//    else 
+//      relogger_log("GOT LOCK");
+    FileInputStream f_in = new FileInputStream(mapF.getFD());
+    mapping.readAndUpdate(f_in);  
+    lock.release();
+    mapF.close();
   }
   
 }

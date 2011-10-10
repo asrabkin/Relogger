@@ -33,6 +33,7 @@ def main():
     print "......ok"
     print "Running second test: persistance"
     test_persist()
+    test_mapfile()
 
     print "Doing performance test"
     
@@ -80,6 +81,7 @@ def filecmp_with_diff(fname1, fname2, err):
 def test_persist():
     out1 = run_and_capture_relogged("edu.berkeley.numberlogs.test.NondeterministicLoad", ["a"])
     print "...ran once"
+    
     output = run_and_capture_relogged("edu.berkeley.numberlogs.test.NondeterministicLoad", ["b"])
     
     if "(4) I am class B" in output:
@@ -91,13 +93,46 @@ def test_persist():
         print "\n\nsecond run:\n--------"
         print output
 
-        
-        
+def    test_mapfile():
+    mappingfile = open('relogger/mapping.out', 'r')
+    mapflines = []
+    for ln in mappingfile:
+        assert(ln.endswith(" info\n"))  #Tags present
+        mapflines.append(ln.strip())
+    mappingfile.close()
+    print "...tags present"
+    mappingfile = open('relogger/mapping.out', 'w')
+    print >>mappingfile,mapflines[0]
+    print >>mappingfile,mapflines[1]
+    mappingfile.close()
+    
+
+#Format is new to old; we're going to rerun B.
+    canonIDs = [ l.split()[0] for l in mapflines]
+    relocation = open('relogger/relocation', 'w')
+    for Aent,Bent in zip(canonIDs[2:4], canonIDs[0:2]):
+        print >>relocation, Aent,Bent
+    relocation.close()
+    #Write a remap file to alias the A entries to B
+
+    output = run_and_capture_relogged("edu.berkeley.numberlogs.test.NondeterministicLoad", ["b"]).splitlines()
+    if not "(1) loading class B" in output[2]:
+        print "ERROR: relocation failed on first try. Output follows\n\n---\n"
+        print output
+        print "Relevant line was",output[2]
+    output = run_and_capture_relogged("edu.berkeley.numberlogs.test.NondeterministicLoad", ["b"]).splitlines()
+    if not "(1) loading class B" in output[2]:
+        print "ERROR: relocation failed on second try. Output follows\n\n---\n"
+        print output
+        print "Relevant line was",output[2]
+
+
 def test_performance():
     unrelogged =  run_and_capture("edu.berkeley.numberlogs.test.LogPerfTest")
     print "performance without relogger:\t"+ unrelogged
     relogged = run_and_capture_relogged("edu.berkeley.numberlogs.test.LogPerfTest")    
-    print "performance with relogger:\t"+ "\n".join(relogged.splitlines()[2:5])
+    relogged = "\n".join(filter(lambda x: "-- " in x, relogged.splitlines()))
+    print "performance with relogger:\t"+ relogged
 
 
 
