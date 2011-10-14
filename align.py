@@ -71,8 +71,12 @@ def matchup(f1_messages, f2_messages, f1_name, f2_name):
     f2_invert_as_strs = dict( [(" ".join(val), k) for (k,val) in f2_messages.items() ]  )
     f2_strs = set(f2_invert_as_strs.keys())
     matches = 0
+    f1_messages_sorted = []
     for (k, v1) in f1_messages.items():
         v1_str = " ".join(v1)
+        f1_messages_sorted.append(  len(v1_str), k, v1_str)
+    f1_messages_sorted.sort()
+    for (_, k, v1_str) in f1_messages_sorted:
         
         best_match_list = difflib.get_close_matches(v1_str, f2_strs, 1, 0.8)
         if len(best_match_list) > 0:

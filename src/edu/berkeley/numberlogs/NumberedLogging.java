@@ -134,7 +134,17 @@ public class NumberedLogging {
   static String[] tags = new String[2000];
   protected static String taggedID(int id) {
     if(tags[id] == null) {
-      tags[id] = "(" + id + ") ";
+      StringBuffer sb = new StringBuffer(40);
+      sb.append('(');
+      sb.append(id);
+//      for(String tag: stmtInfo.tags())
+//        if(Character.isUpperCase(tag.charAt(0))) {
+//          sb.append(' ');
+//          sb.append(tag);
+//        }
+
+      sb.append(") ");
+      tags[id] = sb.toString();
     }
     return tags[id];
   }

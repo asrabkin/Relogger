@@ -32,7 +32,31 @@ import javassist.expr.MethodCall;
 
 public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
 
-
+  enum LogCallAction {
+    LOG_CALL,
+    IGNORE,
+    RESET
+  }
+  
+  static HashMap<String, LogCallAction> LOG_CALLS;
+  
+  static String[] LOG_CALL_ARR = {"trace", "debug", "info", "warn", "error", "fatal", 
+    "fine", "finer", "finest"};
+  static String[] INNOCUOUS_LOGGER_CALL_ARR = {"getLogger", "getLog", "isEnabledFor", 
+      "getLevel", "addHandler", "setUseParentHandlers", "isDebugEnabled", "isInfoEnabled", 
+      "isTraceEnabled", "close", "shutdown", "flush", "getAllAppenders", "parse",
+      "getCurrentLoggers", "append", "removeAllAppenders", "addAppender"};
+  static String[] RESET_CALLS_ARR = {"setLevel", "setAdditivity", "setPriority"};
+  static {
+    LOG_CALLS= new HashMap<String, LogCallAction>(LOG_CALL_ARR.length);
+    for(String s: LOG_CALL_ARR)
+      LOG_CALLS.put(s, LogCallAction.LOG_CALL); 
+    for(String s: INNOCUOUS_LOGGER_CALL_ARR) 
+      LOG_CALLS.put(s, LogCallAction.IGNORE); 
+    for(String s: RESET_CALLS_ARR) 
+      LOG_CALLS.put(s, LogCallAction.RESET); 
+      
+  }
   
   /**
    * This is the entry point invoked by the JVM.
@@ -48,18 +72,8 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
   public final static String PATH_SEPARATOR = File.pathSeparator + "|;";
 
   static final String[] excludePrefixes = {"java", "sun", "org.apache.log4j", 
-      "edu.berkeley.numberlogs", "com"};
+      "edu.berkeley.numberlogs", "com", "javassist", "org.apache.commons.logging"};
 
-  static HashSet<String> LOG_CALLS;
-  
-  static String[] LOG_CALL_ARR = {"trace", "debug", "info", "warn", "error", "fatal"};
-  static {
-    LOG_CALLS= new HashSet<String>(LOG_CALL_ARR.length);
-    for(String s: LOG_CALL_ARR)
-      LOG_CALLS.add(s); 
-  }
-  
-  
   private final ClassPool pool;
   IDMapper IDMap;
 
@@ -125,7 +139,7 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
   
   
   protected CtClass currentClass; //these are only defined during call to transform
-  protected CtBehavior currentMethod;
+  protected String currentMethod;
   int posInClass;
   String classHash;
   public byte[] transform(ClassLoader loader, String className,
@@ -166,7 +180,7 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
       e.printStackTrace();
     } catch (CannotCompileException e) {
       if(currentMethod != null)
-        System.out.println("Failure working on " + cName + "." + currentMethod.getName());
+        System.out.println("Failure working on " + cName + "." + currentMethod);
       else
         System.out.println("Failure working on " + cName );
       e.printStackTrace();
@@ -225,10 +239,10 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
   }
 
   public void edit(CtBehavior method) throws CannotCompileException {
-    currentMethod = method;
+    currentMethod = method.getLongName();
     method.instrument(this);
   }
-
+  
   public void edit(MethodCall e) throws CannotCompileException { 
     int line = e.getLineNumber();
     String meth =  e.getMethodName();
@@ -240,21 +254,28 @@ public class InstrNumberer extends ExprEditor implements ClassFileTransformer {
       targ =  "edu.berkeley.numberlogs.targ.Log4J";
     else if(dest.startsWith("org.apache.commons.log"))
       targ = "edu.berkeley.numberlogs.targ.CommonsLog";
+    else if(dest.startsWith("java.util.logging"))
+      targ = "edu.berkeley.numberlogs.targ.JavaLog";
     
-    if(targ != null && LOG_CALLS.contains(meth)) {
-      
-//      System.out.println("editing method call on line "+ line + " to " + dest);
-      int id = IDMap.localToGlobal(classHash, posInClass++, currentClass.getName(), line, meth);
-      int nargs = Descriptor.numOfParameters(e.getSignature());
-      if(nargs == 1)
-        e.replace(targ + ".logmsg("+id +",\""+meth +"\",$0,$1, null);"); 
-      else if(nargs == 2)
-        e.replace(targ +".logmsg("+id +",\""+meth +"\",$0,$1,$2);"); 
-      else
-        System.err.println("Logger call with 3 or more args. Panic!");
+    if(targ != null)  {
+      LogCallAction action = LOG_CALLS.get(meth);
+      if(action == null) {
+          System.err.println("NOTE: logger call to " + meth + " from " + currentMethod);
+      } else if(action == LogCallAction.LOG_CALL) {
+  //      System.out.println("editing method call on line "+ line + " to " + dest);
+        int id = IDMap.localToGlobal(classHash, posInClass++, currentClass.getName(), line, meth);
+        int nargs = Descriptor.numOfParameters(e.getSignature());
+        if(nargs == 1)
+          e.replace(targ + ".logmsg("+id +",\""+meth +"\",$0,$1, null);"); 
+        else if(nargs == 2)
+          e.replace(targ +".logmsg("+id +",\""+meth +"\",$0,$1,$2);"); 
+        else
+          System.err.println("Logger call with 3 or more args in " + currentMethod + ". Panic!");
+      } else if(action == LogCallAction.IGNORE){
+      } else if(action == LogCallAction.RESET) {
+        e.replace("{ $_ = $proceed($$); edu.berkeley.numberlogs.NumberedLogging.resetCachedDisable(); }");
+      }
     }
-    
   }
-
 }//end class
 

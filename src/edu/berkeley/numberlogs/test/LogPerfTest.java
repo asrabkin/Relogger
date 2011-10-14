@@ -2,6 +2,9 @@ package edu.berkeley.numberlogs.test;
 
 import java.io.IOException;
 import java.util.BitSet;
+import java.util.logging.Formatter;
+import java.util.logging.SimpleFormatter;
+import java.util.logging.StreamHandler;
 import org.apache.commons.logging.Log;
 import org.apache.log4j.SimpleLayout;
 import org.apache.log4j.Level;
@@ -150,15 +153,45 @@ public class LogPerfTest {
      duration = System.currentTimeMillis() - startT;
      return duration * 1000 * 1000.0 / PRINTRUNS;
    }
-   
    public String name() {
-     return "formatted Apache";
+     return "formatted Apache Commons";
    }    
  }
- 
 
-  public static final long RUNS = 100* 1000*1000;
-  static final int PRINTRUNS = 1000 * 1000 * 10;
+ static class JavaPrinted implements TestCase {
+   
+   int JAVA_PRINTRUNS;
+   public JavaPrinted() {
+     JAVA_PRINTRUNS = PRINTRUNS / 50;
+   }
+   
+   public void warmup() {
+//     for(Handler h: JavaLOG.getHandlers())
+//       JavaLOG.removeHandler(h);
+     JavaLOG.setUseParentHandlers(false);
+     Formatter fmtr = new SimpleFormatter();
+     JavaLOG.addHandler(new StreamHandler(new DummyOutputStream(), fmtr));
+     for(int i=0; i < JAVA_PRINTRUNS; ++i) {
+       JavaLOG.getLevel();
+       JavaLOG.info("me too!");
+     }
+   }
+   
+   public double test() {
+     long startT = System.currentTimeMillis();
+     for(int i=0; i < JAVA_PRINTRUNS; ++i)
+       JavaLOG.info("I am a simple log statement");
+     long duration = System.currentTimeMillis() - startT;
+     return duration * 1000 * 1000.0 / JAVA_PRINTRUNS;
+   }
+   
+   public String name() {
+     return "formatted Java.util.log";
+   }    
+ }  
+
+  public static final long RUNS = 100 * 1000 * 1000;
+  static final int PRINTRUNS    =  5  * 1000 * 1000;
   static Logger LOG = Logger.getLogger(LogPerfTest.class);
   static org.apache.commons.logging.Log ApacheLOG =
     org.apache.commons.logging.LogFactory.getLog(LogPerfTest.class);
@@ -170,7 +203,6 @@ public class LogPerfTest {
   
   public static void main(String[] args) {
     LOG.setLevel(Level.INFO);
-    
     JavaLOG = java.util.logging.Logger.getLogger("commons.logger");
     
     if(args.length > 0)  {
@@ -185,6 +217,7 @@ public class LogPerfTest {
         new JavaUnprinted(), 
         new Log4JUnprinted(), 
         new ApacheUnprinted(), 
+        new JavaPrinted(), 
         new Log4JPrinted(), 
         new ApachePrinted()
     };

@@ -149,14 +149,15 @@ relogged_txt="""UDP listener alive on port 2345
 RELOGGER triggering write on exit"""
 
 PERF_LINE_RE = re.compile("-- ([^ ]+) (.*) avg = ([0-9\.]+) ns	stddev = ([0-9\.]+) ns")
-RUNS = "runs=20"
+RUNS = "runs=10"
 def detailed_performance():
+    print time.asctime()
     unrelogged_txt =  run_and_capture("edu.berkeley.numberlogs.test.LogPerfTest", args=[RUNS])
     perf_table_without = get_perftable(unrelogged_txt)
-    print "Ran without relogger. Now running with..."
+    print time.asctime()+": Ran without relogger. Now running with..."
     relogged_txt = run_and_capture_relogged("edu.berkeley.numberlogs.test.LogPerfTest", args=[RUNS])
     perf_table_with = get_perftable(relogged_txt)
-    print "...OK\n\n"
+    print time.asctime() + "...OK\n\n"
     
     for (k,(avg,dev)) in sorted(perf_table_without.items()):
         (fmt,logger) = k

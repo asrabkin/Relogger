@@ -14,14 +14,14 @@ public class JavaLog extends NumberedLogging {
   }
   
   public static void longer_logmsg(int id, String original_methname, Logger log, Object msg, Throwable ex) {
-    Level lev = Level.parse(original_methname);
+    Level lev = Level.parse(original_methname.toUpperCase());
     boolean legacyEnabled =  log.isLoggable(lev);
     int printResult = shouldPrint(id, legacyEnabled);
     if( (printResult & LOG_OUT)  != 0) {
       if(ex == null)
-        log.log(lev, "("+id+") "+ msg);
+        log.log(lev, taggedID(id) + msg);
       else
-        log.log(lev, "("+id+") "+ msg, ex);
+        log.log(lev, taggedID(id) + msg, ex);
     }
     if( (printResult & RECORD_OUT) != 0)
       RecordStatements.record(id, original_methname, msg, ex);  
