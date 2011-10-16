@@ -255,3 +255,11 @@ Should do tagging. Esp. including by previous methname.  Need to write out.
 
 -----
 Relocation tables seem to work?
+
+
+10/14:
+	https://github.com/twitter/configgy 
+	Classload measurements done. Adds a few ms per class.
+	JavaLog now integrated.
+	
+	Configgy has a format-string log method.
