@@ -263,3 +263,24 @@ Relocation tables seem to work?
 	JavaLog now integrated.
 	
 	Configgy has a format-string log method.
+
+
+10/16:
+	Tried with boolean[].  No difference.
+
+    int newLen = Math.max(id+1, cachedMaskTable.length);
+    boolean[] newTable = Arrays.copyOf(cachedMaskTable, newLen);
+    newTable[id] =  newVal;
+
+
+10/18:
+	Doing rewrite with ASM could be miserable. Consider the case like this:
+push message
+if(foo)
+   call logg	
+else
+   call printf.
+
+Pushing the ID onto the stack before message will leave the stack unbalanced.
+
+FIX:  push the ID arg last.

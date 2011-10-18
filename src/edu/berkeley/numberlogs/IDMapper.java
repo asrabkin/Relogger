@@ -30,7 +30,7 @@ public class IDMapper {
       tags = new LinkedList<String>();
     }
 
-    public void addTag(String t) {
+    public synchronized void addTag(String t) {
       if(!tags.contains(t))
         tags.add(t);
     }
@@ -63,7 +63,7 @@ public class IDMapper {
   /**
    * Called once per program run, at load time.
    * @param classHash
-   * @param posInClass
+   * @param posInClass   ignored
    * @param classname
    * @param lineno
    * @return

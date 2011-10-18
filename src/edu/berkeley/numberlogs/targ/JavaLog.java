@@ -6,14 +6,14 @@ import java.util.logging.*;
 
 public class JavaLog extends NumberedLogging {
   
-  public static void logmsg(int id, String original_methname, Logger log, Object msg, Throwable ex) {
-    if(cachedMaskTable.get(id))
+  public static void logmsg(Logger log, Object msg, Throwable ex, int id, String original_methname) {
+    if(cachedMask(id))
       return;
     else
-      longer_logmsg(id, original_methname, log, msg, ex);
+      longer_logmsg(log, msg, ex, id, original_methname);
   }
   
-  public static void longer_logmsg(int id, String original_methname, Logger log, Object msg, Throwable ex) {
+  public static void longer_logmsg(Logger log, Object msg, Throwable ex, int id, String original_methname) {
     Level lev = Level.parse(original_methname.toUpperCase());
     boolean legacyEnabled =  log.isLoggable(lev);
     int printResult = shouldPrint(id, legacyEnabled);

@@ -16,7 +16,7 @@
 			<fileset dir="src"/>
 			<file file="COPYING"/>
 			<manifest>
-				<attribute name="Premain-Class" value="edu.berkeley.numberlogs.InstrNumberer"/>
+				<attribute name="Premain-Class" value="edu.berkeley.numberlogs.AbstractNumberer"/>
 			</manifest>
 		</jar>
 	</target>

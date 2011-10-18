@@ -15,13 +15,13 @@ public class TestNumberedLogsPerf {
     
     for(int i=0; i < RUNS; ++i) {
       LOG.isTraceEnabled();
-      Log4J.logmsg(0, "trace", LOG, "I am a warmup log statement", null);
+      Log4J.logmsg(LOG, "I am a warmup log statement", null, 0, "trace");
     }
     System.out.println("Done warming");
     
     long startT = System.currentTimeMillis();
     for(int i=0; i < RUNS; ++i)
-      Log4J.logmsg(0, "trace", LOG, "I am a simple log statement", null);
+      Log4J.logmsg(LOG, "I am a simple log statement", null, 0, "trace");
     long duration = System.currentTimeMillis() - startT;
     long ns_per_log = duration * 1000 * 1000 / RUNS;
     System.out.println(ns_per_log + "ns per un-used log stmt");

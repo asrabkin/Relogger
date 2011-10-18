@@ -6,14 +6,13 @@ import edu.berkeley.numberlogs.RecordStatements;
 
 public class CommonsLog extends NumberedLogging {
 
-  public static void logmsg(int id, String original_methname, org.apache.commons.logging.Log log, Object msg, Throwable ex) {
-    if(cachedMaskTable.get(id))
+  public static void logmsg(org.apache.commons.logging.Log log, Object msg, Throwable ex, int id, String original_methname) {
+    if(cachedMask(id))
       return;
-    else longer_logmsg(id, original_methname, log, msg, ex);
+    else longer_logmsg(log, msg, ex, id, original_methname);
   }
 
-
-  public static void longer_logmsg(int id, String original_methname, org.apache.commons.logging.Log log, Object msg, Throwable ex) {
+  public static void longer_logmsg(org.apache.commons.logging.Log log, Object msg, Throwable ex, int id, String original_methname) {
 
     LEVS methname = getWarnLevel(id);
     if(methname == null)

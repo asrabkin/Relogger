@@ -20,14 +20,14 @@ public class Log4J extends NumberedLogging {
   }
 
   
-  public static void logmsg(int id, String original_methname, Logger log, Object msg, Throwable ex) {
-    if(cachedMaskTable.get(id))
+  public static void logmsg(Logger log, Object msg, Throwable ex, int id, String original_methname) {
+    if(cachedMask(id))
       return;
-    else longer_logmsg_Log4j(id, original_methname, log, msg, ex);
+    else longer_logmsg_Log4j(log, msg, ex, id, original_methname);
   }
 
   //Split from above because JVMs don't always inline long methods.
-  private static void longer_logmsg_Log4j(int id, String original_methname, Logger log, Object msg, Throwable ex) {
+  private static void longer_logmsg_Log4j(Logger log, Object msg, Throwable ex, int id, String original_methname) {
 
     Level level = Level.toLevel(original_methname);
     boolean legacyEnabled = log.isEnabledFor(level);

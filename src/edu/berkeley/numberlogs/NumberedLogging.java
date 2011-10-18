@@ -4,19 +4,23 @@
  */
 package edu.berkeley.numberlogs;
 
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.concurrent.ConcurrentHashMap;
+import edu.berkeley.numberlogs.IDMapper.StmtInfo;
 
 public class NumberedLogging {
 
     //concurrently accessible.
-  protected static volatile BitSet cachedMaskTable = new BitSet();
+  private static volatile BitSet cachedMaskTable = new BitSet();
+//  protected static volatile boolean[] cachedMaskTable = new boolean[10];
   static ConcurrentHashMap<Integer, LEVS> warnLevels = new ConcurrentHashMap<Integer, LEVS>();
 
     //should be protected by a lock on the class.
   static BitSet userDisabled = new BitSet();
   static BitSet userEnabled = new BitSet();
   static BitSet printedOnce = new BitSet(); //this is undefined if user-enabled.
+  static IDMapper mapper;
 
   static boolean ALWAYS_PRINT_ONCE = false;
   static boolean RECORD_ONCE = true;
@@ -39,6 +43,11 @@ public class NumberedLogging {
       return LEVS.TRACE;
     else
       return LEVS.UNKNOWN;
+  }
+  
+
+  protected static boolean cachedMask(int id) {
+    return cachedMaskTable.get(id);
   }
 
   static synchronized void updateUser(int i, boolean isDisabled) {
@@ -68,6 +77,7 @@ public class NumberedLogging {
    * @param newVal
    */
   private static void changeCacheDisable(int id, boolean newVal) {
+
     int newLen = Math.max(id, cachedMaskTable.size());
     BitSet newTable = new BitSet(newLen);
     newTable.or(cachedMaskTable);
@@ -131,18 +141,23 @@ public class NumberedLogging {
     return LOG_OUT | returnV; 
   }
   
-  static String[] tags = new String[2000];
+  static String[] tags = new String[200];
   protected static String taggedID(int id) {
+    if(id >= tags.length)
+      tags = Arrays.copyOf(tags, id * 2);
     if(tags[id] == null) {
       StringBuffer sb = new StringBuffer(40);
       sb.append('(');
       sb.append(id);
-//      for(String tag: stmtInfo.tags())
-//        if(Character.isUpperCase(tag.charAt(0))) {
-//          sb.append(' ');
-//          sb.append(tag);
-//        }
-
+      StmtInfo stmtInfo = mapper.getInfo(id);
+      synchronized(stmtInfo) {
+        for(String tag: stmtInfo.tags)
+          if(Character.isUpperCase(tag.charAt(0))) {
+            sb.append(' ');
+            sb.append(tag);
+          }
+      }
+      
       sb.append(") ");
       tags[id] = sb.toString();
     }
