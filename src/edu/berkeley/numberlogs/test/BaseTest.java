@@ -35,7 +35,7 @@ public class BaseTest {
 
   }
 
-  private static void commonsLogs(IOException e) {
+  static void commonsLogs(IOException e) {
     
     
     COMMONS_LOG.fatal("I am fatal");

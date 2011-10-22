@@ -273,7 +273,7 @@ Relocation tables seem to work?
     newTable[id] =  newVal;
 
 
-10/18:
+10/17:
 	Doing rewrite with ASM could be miserable. Consider the case like this:
 push message
 if(foo)
@@ -284,3 +284,19 @@ else
 Pushing the ID onto the stack before message will leave the stack unbalanced.
 
 FIX:  push the ID arg last.
+
+
+10/18:
+	ASM-based version now works. 
+	
+
+10/20:
+	Outlining ASM method-escape analysis. Want to use this for programmatic API.
+
+	First pass: map from every bytecode that's a call to getMethID to ID of next successive log call.
+	Define lattice where elements are sets of ints.
+		Calls to getMethID() return the unique methID of the returned value.
+		Propagation rule is just dataflow; merge operation is just union.
+	If ever there's a store instruction to a static field, should delete store instr from code, replace with pop.
+	Add corresponding store instr to static initializer.
+	Replace calls to getMethID with const-push

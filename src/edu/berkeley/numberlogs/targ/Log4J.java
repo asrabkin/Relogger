@@ -23,11 +23,18 @@ public class Log4J extends NumberedLogging {
   public static void logmsg(Logger log, Object msg, Throwable ex, int id, String original_methname) {
     if(cachedMask(id))
       return;
-    else longer_logmsg_Log4j(log, msg, ex, id, original_methname);
+    else longer_logmsg_Log4j(log, msg, ex, id, original_methname, true);
   }
 
+  public static void logmsg_noid(Logger log, Object msg, Throwable ex, int id, String original_methname) {
+    if(cachedMask(id))
+      return;
+    else longer_logmsg_Log4j(log, msg, ex, id, original_methname, false);
+  }
+  
   //Split from above because JVMs don't always inline long methods.
-  private static void longer_logmsg_Log4j(Logger log, Object msg, Throwable ex, int id, String original_methname) {
+  private static void longer_logmsg_Log4j(Logger log, Object msg, Throwable ex, int id, 
+      String original_methname, boolean printID) {
 
     Level level = Level.toLevel(original_methname);
     boolean legacyEnabled = log.isEnabledFor(level);
@@ -39,9 +46,10 @@ public class Log4J extends NumberedLogging {
       Level level = Level.toLevel(methname.toString());*/
 
       String logname = log.getName();
-//taggedID(id)+
+      if(printID)
+        msg = "(" + id + ") "+ msg;
       log.callAppenders(
-           new org.apache.log4j.spi.LoggingEvent(logname, log, level, "(" + id + ") "+ msg, ex));
+           new org.apache.log4j.spi.LoggingEvent(logname, log, level, msg, ex));
     }
     if( (printResult & RECORD_OUT) != 0)
       RecordStatements.record(id, original_methname, msg, ex);

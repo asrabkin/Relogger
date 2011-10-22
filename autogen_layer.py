@@ -15,10 +15,10 @@ if_skel = """
 long_case_skel = """case %s:
     shouldPrint = shouldPrint(id, log.is%sEnabled());    
     if( (shouldPrint & LOG_OUT) !=0)
-        commonsLog_%s(log, id, msg, ex);
+        commonsLog_%s(log, id, msg, ex, printID);
     break;"""
 short_case_skel = """case %s:
-        commonsLog_%s(log, id, msg, ex);
+        commonsLog_%s(log, id, msg, ex, printID);
         break;"""
     
 has_isEnabled = ['info', 'debug','trace']    
@@ -33,11 +33,17 @@ def commons_for_level(l):
     return long_case_skel % (l.upper(), l.capitalize(), l)
 
 
-stub_skel = """  public static void commonsLog_%s(%s log, int id, Object msg, Throwable ex) {
-    if(ex == null) 
-      log.%s("(" + id + ") " +msg);
+stub_skel = """  public static void commonsLog_%s(%s log, int id, Object msg, Throwable ex, boolean printID) {
+    String msg_str;
+    if(printID)
+        msg_str = taggedID(id) + msg;
     else
-      log.%s("(" + id + ") " +msg, ex);
+        msg_str = msg.toString();
+
+    if(ex == null) 
+      log.%s(msg_str);
+    else
+      log.%s(msg_str, ex);
   }"""
 def lev_stub(lev ):
     return stub_skel % (lev, "Log", lev, lev)
