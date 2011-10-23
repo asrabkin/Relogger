@@ -77,6 +77,7 @@ def filecmp_with_diff(fname1, fname2, err):
             sys.stdout.write(d)
         f1.close()
         f2.close()
+        sys.exit(0)
 
 def test_persist():
     out1 = run_and_capture_relogged("edu.berkeley.numberlogs.test.NondeterministicLoad", ["a"])

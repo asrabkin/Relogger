@@ -1,36 +1,36 @@
-13	a88cbfe86ffbd422f7568ea636e2f4c5_20	edu.berkeley.numberlogs.test.BaseTest:20	fatal	I am fatal
-14	a88cbfe86ffbd422f7568ea636e2f4c5_21	edu.berkeley.numberlogs.test.BaseTest:21	error	I am error
-15	a88cbfe86ffbd422f7568ea636e2f4c5_22	edu.berkeley.numberlogs.test.BaseTest:22	warn	I am warn
-16	a88cbfe86ffbd422f7568ea636e2f4c5_23	edu.berkeley.numberlogs.test.BaseTest:23	info	I am info
-17	a88cbfe86ffbd422f7568ea636e2f4c5_24	edu.berkeley.numberlogs.test.BaseTest:24	debug	I am debug
-18	a88cbfe86ffbd422f7568ea636e2f4c5_25	edu.berkeley.numberlogs.test.BaseTest:25	trace	I am trace
-19	a88cbfe86ffbd422f7568ea636e2f4c5_27	edu.berkeley.numberlogs.test.BaseTest:27	fatal	I am fatal
+13	f766eac5ea2e3b979599c83004ff5bb3_20	edu.berkeley.numberlogs.test.BaseTest:20	fatal	I am fatal
+14	f766eac5ea2e3b979599c83004ff5bb3_21	edu.berkeley.numberlogs.test.BaseTest:21	error	I am error
+15	f766eac5ea2e3b979599c83004ff5bb3_22	edu.berkeley.numberlogs.test.BaseTest:22	warn	I am warn
+16	f766eac5ea2e3b979599c83004ff5bb3_23	edu.berkeley.numberlogs.test.BaseTest:23	info	I am info
+17	f766eac5ea2e3b979599c83004ff5bb3_24	edu.berkeley.numberlogs.test.BaseTest:24	debug	I am debug
+18	f766eac5ea2e3b979599c83004ff5bb3_25	edu.berkeley.numberlogs.test.BaseTest:25	trace	I am trace
+19	f766eac5ea2e3b979599c83004ff5bb3_27	edu.berkeley.numberlogs.test.BaseTest:27	fatal	I am fatal
 java.io.IOException: An exception
-20	a88cbfe86ffbd422f7568ea636e2f4c5_28	edu.berkeley.numberlogs.test.BaseTest:28	error	I am error
+20	f766eac5ea2e3b979599c83004ff5bb3_28	edu.berkeley.numberlogs.test.BaseTest:28	error	I am error
 java.io.IOException: An exception
-21	a88cbfe86ffbd422f7568ea636e2f4c5_29	edu.berkeley.numberlogs.test.BaseTest:29	warn	I am warn
+21	f766eac5ea2e3b979599c83004ff5bb3_29	edu.berkeley.numberlogs.test.BaseTest:29	warn	I am warn
 java.io.IOException: An exception
-22	a88cbfe86ffbd422f7568ea636e2f4c5_30	edu.berkeley.numberlogs.test.BaseTest:30	info	I am info
+22	f766eac5ea2e3b979599c83004ff5bb3_30	edu.berkeley.numberlogs.test.BaseTest:30	info	I am info
 java.io.IOException: An exception
-23	a88cbfe86ffbd422f7568ea636e2f4c5_31	edu.berkeley.numberlogs.test.BaseTest:31	debug	I am debug
+23	f766eac5ea2e3b979599c83004ff5bb3_31	edu.berkeley.numberlogs.test.BaseTest:31	debug	I am debug
 java.io.IOException: An exception
-24	a88cbfe86ffbd422f7568ea636e2f4c5_32	edu.berkeley.numberlogs.test.BaseTest:32	trace	I am trace
+24	f766eac5ea2e3b979599c83004ff5bb3_32	edu.berkeley.numberlogs.test.BaseTest:32	trace	I am trace
 java.io.IOException: An exception
-1	a88cbfe86ffbd422f7568ea636e2f4c5_41	edu.berkeley.numberlogs.test.BaseTest:41	fatal	I am fatal
-2	a88cbfe86ffbd422f7568ea636e2f4c5_42	edu.berkeley.numberlogs.test.BaseTest:42	error	I am error
-3	a88cbfe86ffbd422f7568ea636e2f4c5_43	edu.berkeley.numberlogs.test.BaseTest:43	warn	I am warn
-4	a88cbfe86ffbd422f7568ea636e2f4c5_44	edu.berkeley.numberlogs.test.BaseTest:44	info	I am info
-5	a88cbfe86ffbd422f7568ea636e2f4c5_45	edu.berkeley.numberlogs.test.BaseTest:45	debug	I am debug
-6	a88cbfe86ffbd422f7568ea636e2f4c5_46	edu.berkeley.numberlogs.test.BaseTest:46	trace	I am trace
-7	a88cbfe86ffbd422f7568ea636e2f4c5_48	edu.berkeley.numberlogs.test.BaseTest:48	fatal	I am fatal
+1	f766eac5ea2e3b979599c83004ff5bb3_40	edu.berkeley.numberlogs.test.BaseTest:40	fatal	I am fatal
+2	f766eac5ea2e3b979599c83004ff5bb3_41	edu.berkeley.numberlogs.test.BaseTest:41	error	I am error
+3	f766eac5ea2e3b979599c83004ff5bb3_42	edu.berkeley.numberlogs.test.BaseTest:42	warn	I am warn
+4	f766eac5ea2e3b979599c83004ff5bb3_43	edu.berkeley.numberlogs.test.BaseTest:43	info	I am info
+5	f766eac5ea2e3b979599c83004ff5bb3_44	edu.berkeley.numberlogs.test.BaseTest:44	debug	I am debug
+6	f766eac5ea2e3b979599c83004ff5bb3_45	edu.berkeley.numberlogs.test.BaseTest:45	trace	I am trace
+7	f766eac5ea2e3b979599c83004ff5bb3_47	edu.berkeley.numberlogs.test.BaseTest:47	fatal	I am fatal
 java.io.IOException: An exception
-8	a88cbfe86ffbd422f7568ea636e2f4c5_49	edu.berkeley.numberlogs.test.BaseTest:49	error	I am error
+8	f766eac5ea2e3b979599c83004ff5bb3_48	edu.berkeley.numberlogs.test.BaseTest:48	error	I am error
 java.io.IOException: An exception
-9	a88cbfe86ffbd422f7568ea636e2f4c5_50	edu.berkeley.numberlogs.test.BaseTest:50	warn	I am warn
+9	f766eac5ea2e3b979599c83004ff5bb3_49	edu.berkeley.numberlogs.test.BaseTest:49	warn	I am warn
 java.io.IOException: An exception
-10	a88cbfe86ffbd422f7568ea636e2f4c5_51	edu.berkeley.numberlogs.test.BaseTest:51	info	I am info
+10	f766eac5ea2e3b979599c83004ff5bb3_50	edu.berkeley.numberlogs.test.BaseTest:50	info	I am info
 java.io.IOException: An exception
-11	a88cbfe86ffbd422f7568ea636e2f4c5_52	edu.berkeley.numberlogs.test.BaseTest:52	debug	I am debug
+11	f766eac5ea2e3b979599c83004ff5bb3_51	edu.berkeley.numberlogs.test.BaseTest:51	debug	I am debug
 java.io.IOException: An exception
-12	a88cbfe86ffbd422f7568ea636e2f4c5_53	edu.berkeley.numberlogs.test.BaseTest:53	trace	I am trace
+12	f766eac5ea2e3b979599c83004ff5bb3_52	edu.berkeley.numberlogs.test.BaseTest:52	trace	I am trace
 java.io.IOException: An exception

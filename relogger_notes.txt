@@ -300,3 +300,8 @@ FIX:  push the ID arg last.
 	If ever there's a store instruction to a static field, should delete store instr from code, replace with pop.
 	Add corresponding store instr to static initializer.
 	Replace calls to getMethID with const-push
+
+
+10/21:
+	Const rewriting works. Shaved off about 150 ns.
+	Problem with java.util.logging 

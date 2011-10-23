@@ -10,27 +10,28 @@ public class JavaLog extends NumberedLogging {
     if(cachedMask(id))
       return;
     else
-      longer_logmsg(log, msg, ex, id, original_methname, true);
+      longer_logmsg(log, msg, ex, id, original_methname, null);
   }
 
-  public static void logmsg_noid(Logger log, Object msg, Throwable ex, int id, String original_methname) {
+  public static void logmsg_noid(Logger log, Object msg, Throwable ex, int id, String original_methname,
+      Object newmsg) {
     if(cachedMask(id))
       return;
     else
-      longer_logmsg(log, msg, ex, id, original_methname, false);
+      longer_logmsg(log, msg, ex, id, original_methname, newmsg);
   }
   
   public static void longer_logmsg(Logger log, Object msg, Throwable ex, int id, 
-      String original_methname, boolean printID) {
+      String original_methname, Object newmsg) {
     Level lev = Level.parse(original_methname.toUpperCase());
     boolean legacyEnabled =  log.isLoggable(lev);
     int printResult = shouldPrint(id, legacyEnabled);
     if( (printResult & LOG_OUT)  != 0) {
       String msg_str;
-      if(printID)
+      if(newmsg == null)
         msg_str = taggedID(id) + msg;
       else
-        msg_str = msg.toString();
+        msg_str = newmsg.toString();
       
       if(ex == null)
         log.log(lev, msg_str);

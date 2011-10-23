@@ -24,8 +24,14 @@ public class TestClassloadPerf {
         Class.forName(s);
         loadedOK ++;
       } catch (ClassNotFoundException e) {
+        if(errs == 0) {
+          e.printStackTrace();
+        }
         errs ++;
       } catch(NoClassDefFoundError e) {
+        if(errs == 0) {
+          e.printStackTrace();
+        }
         errs ++;
       }
     }

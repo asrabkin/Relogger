@@ -37,7 +37,6 @@ public class BaseTest {
 
   static void commonsLogs(IOException e) {
     
-    
     COMMONS_LOG.fatal("I am fatal");
     COMMONS_LOG.error("I am error");
     COMMONS_LOG.warn("I am warn");
