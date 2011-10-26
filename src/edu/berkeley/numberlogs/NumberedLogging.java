@@ -130,15 +130,14 @@ public class NumberedLogging {
     if(userEnabled.get(id))
       return LOG_OUT | returnV;
     
-    if(!legacyEnabled) {
-        //should disable message, since user didn't say and legacy logger disabled
+    if(legacyEnabled) {
+      //Any user-disable was merged into the cache-disable mask.
+      return LOG_OUT | returnV; 
+    } else {
+        //should disable message, since user didn't specify either way and legacy logger disabled
       changeCacheDisable(id, true);
       return returnV; //decision to print based on whether was first-time or sampling
     }
-    
-  //legacy enabled. 
-  //Any user-disable was merged into the cache-disable mask.
-    return LOG_OUT | returnV; 
   }
   
   static String[] tags = new String[200];
@@ -180,6 +179,12 @@ public class NumberedLogging {
       sb.deleteCharAt(sb.length() -1);
     sb.append("}");
     return sb.toString();
+  }
+
+
+  public static int getNextCallID() {
+    System.out.println("This call should be inlined away");
+    return -1;
   }
 
 

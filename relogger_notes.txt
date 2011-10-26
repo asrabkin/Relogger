@@ -295,13 +295,23 @@ FIX:  push the ID arg last.
 
 	First pass: map from every bytecode that's a call to getMethID to ID of next successive log call.
 	Define lattice where elements are sets of ints.
-		Calls to getMethID() return the unique methID of the returned value.
+		Calls to getNextCallID() return the unique callID of the returned value.
 		Propagation rule is just dataflow; merge operation is just union.
 	If ever there's a store instruction to a static field, should delete store instr from code, replace with pop.
 	Add corresponding store instr to static initializer.
-	Replace calls to getMethID with const-push
+	Replace calls to getNextCallID with const-push
 
 
 10/21:
 	Const rewriting works. Shaved off about 150 ns.
 	Problem with java.util.logging 
+Avg of log4j and commons
+Unmodified	550
+Fuse		758
+Nofuse		915
+	So fusing almost cut penalty in half.
+
+Time for   https://github.com/twitter/configgy/tree/master/src/main/scala/net/lag to get code into michael's hands
+	can specify JAVA_OPTS env var for scala
+
+Can inline getNextCallID BEFORE rewriting statements. 

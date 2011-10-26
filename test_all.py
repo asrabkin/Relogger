@@ -36,6 +36,8 @@ def main():
     test_mapfile()
 
     print "Doing performance test"
+
+#    test_rewrite_perf()    
     
     if len(sys.argv) > 1 and "perftable" in sys.argv[1]:
         detailed_performance()
@@ -127,6 +129,10 @@ def    test_mapfile():
         print output
         print "Relevant line was",output[2]
 
+
+def test_rewrite_perf():
+    pass
+#  java -javaagent:numberedlogs.jar -cp numberedlogs.jar:lib/log4j-1.2.15.jar:lib/commons-logging-api-1.0.4.jar:lib/commons-logging-1.0.4.jar:lib/javassist-3.15.0.jar:lib/asm-all-3.3.1.jar:conf:/Users/asrabkin/workspace/hadoop-0.20.2/hadoop-0.20.2-core.jar  edu.berkeley.numberlogs.test.TestClassloadPerf hadoop-20.2-classes.txt
 
 def test_performance():
     unrelogged =  run_and_capture("edu.berkeley.numberlogs.test.LogPerfTest")
