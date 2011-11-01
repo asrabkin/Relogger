@@ -315,3 +315,7 @@ Time for   https://github.com/twitter/configgy/tree/master/src/main/scala/net/la
 	can specify JAVA_OPTS env var for scala
 
 Can inline getNextCallID BEFORE rewriting statements. 
+
+
+10/26:
+	Why don't code hashes change when I expect them to?

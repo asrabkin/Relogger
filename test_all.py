@@ -34,7 +34,8 @@ def main():
     print "Running second test: persistance"
     test_persist()
     test_mapfile()
-
+    print "testing message-numbering"
+    test_numbering()
     print "Doing performance test"
 
 #    test_rewrite_perf()    
@@ -129,6 +130,18 @@ def    test_mapfile():
         print output
         print "Relevant line was",output[2]
 
+
+def test_numbering():
+    if os.path.exists('relogger'):
+        shutil.rmtree("relogger")
+    shutil.os.mkdir("relogger")
+
+    relogged = run_and_capture_relogged("edu.berkeley.numberlogs.test.TestStmtNumbers")    
+    if "Future statement ID is 1" in relogged and \
+        "(1) I am log statement number 1" in relogged:
+        print "...ok"
+    else:
+        print "ERR: Failed with output" + relogged
 
 def test_rewrite_perf():
     pass
