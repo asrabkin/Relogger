@@ -21,7 +21,7 @@ import edu.berkeley.numberlogs.ConstFlowAnalysis.ConstSrc;
 
 public class ASMNumberer extends AbstractNumberer {
 
-  static final boolean TRACE_ON = true;
+  static final boolean TRACE_ON = false;
   static boolean TRY_STRING_FUSE = true;
   static boolean REWRITE_CALLID_ESCAPE = true;
   

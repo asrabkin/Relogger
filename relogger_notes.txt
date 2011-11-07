@@ -319,3 +319,11 @@ Can inline getNextCallID BEFORE rewriting statements.
 
 10/26:
 	Why don't code hashes change when I expect them to?
+
+10/31:
+	For configgy, makes sense to just capture calls to log().  
+We can override:
+    public void log(net.lag.logging.Level, java.lang.Throwable, java.lang.String, scala.Seq);
+    public void log(net.lag.logging.Level, java.lang.String, scala.Seq);
+
+Will require scalalib at compile time but not run-time.

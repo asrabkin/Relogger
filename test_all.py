@@ -145,7 +145,7 @@ def test_numbering():
 
 def test_rewrite_perf():
     pass
-#  java -javaagent:numberedlogs.jar -cp numberedlogs.jar:lib/log4j-1.2.15.jar:lib/commons-logging-api-1.0.4.jar:lib/commons-logging-1.0.4.jar:lib/javassist-3.15.0.jar:lib/asm-all-3.3.1.jar:conf:/Users/asrabkin/workspace/hadoop-0.20.2/hadoop-0.20.2-core.jar  edu.berkeley.numberlogs.test.TestClassloadPerf hadoop-20.2-classes.txt
+#  java -javaagent:numberedlogs.jar -cp numberedlogs.jar:lib/log4j-1.2.15.jar:lib/commons-logging-api-1.0.4.jar:lib/commons-logging-1.0.4.jar:lib/asm-all-3.3.1.jar:conf:/Users/asrabkin/workspace/hadoop-0.20.2/hadoop-0.20.2-core.jar  edu.berkeley.numberlogs.test.TestClassloadPerf hadoop-20.2-classes.txt
 
 def test_performance():
     unrelogged =  run_and_capture("edu.berkeley.numberlogs.test.LogPerfTest")
@@ -153,6 +153,10 @@ def test_performance():
     relogged = run_and_capture_relogged("edu.berkeley.numberlogs.test.LogPerfTest")    
     relogged = "\n".join(filter(lambda x: "-- " in x, relogged.splitlines()))
     print "performance with relogger:\t"+ relogged
+
+    relogged = run_and_capture_relogged("edu.berkeley.numberlogs.test.LogPerfTest", nofuse=True)
+    relogged = "\n".join(filter(lambda x: "-- " in x, relogged.splitlines()))
+    print "performance with relogger, const-fusing off:\t"+ relogged
 
 
 
@@ -177,13 +181,20 @@ def detailed_performance():
     print time.asctime()+": Ran without relogger. Now running with..."
     relogged_txt = run_and_capture_relogged("edu.berkeley.numberlogs.test.LogPerfTest", args=[RUNS])
     perf_table_with = get_perftable(relogged_txt)
+    print time.asctime()+": Now running with cont-fusing disabled..."
+
+    relogged_txt = run_and_capture_relogged("edu.berkeley.numberlogs.test.LogPerfTest", args=[RUNS], nofuse=True)
+    perf_table_with_nofuse = get_perftable(relogged_txt)
+    
     print time.asctime() + "...OK\n\n"
     
     for (k,(avg,dev)) in sorted(perf_table_without.items()):
         (fmt,logger) = k
         avg_with,dev_with = perf_table_with[k]
-        print "%s & %s & %0.2f & %0.2f & %0.2f & %0.2f \\\\" % \
-            (logger, fmt, avg,dev, avg_with,dev_with)
+        avg_with_nofuse,dev_with_nofuse = perf_table_with_nofuse[k]
+
+        print "%s & %s & %0.2f & %0.2f & %0.2f & %0.2f& %0.2f & %0.2f \\\\" % \
+            (logger, fmt, avg,dev, avg_with,dev_with, avg_with_nofuse,dev_with_nofuse)
         print "\hline"
     print "\n\nEND"
 
@@ -209,13 +220,17 @@ def get_perftable(cmd_out):
 
 
 AGENT_INJECT="-javaagent:numberedlogs.jar"
-def run_and_capture_relogged(java_main, args=[]):
-    return run_and_capture(java_main, args, relogged=True)
+def run_and_capture_relogged(java_main, args=[], nofuse=False):
+    return run_and_capture(java_main, args, relogged=True, nofuse=nofuse)
 
-def run_and_capture(java_main, args=[], relogged=False):
+def run_and_capture(java_main, args=[], relogged=False, nofuse=False):
     cmd_array = ["java"]
     if relogged:
-        cmd_array.append(AGENT_INJECT)
+        agentCmd = AGENT_INJECT
+        if nofuse:
+            agentCmd = agentCmd + "=nofuse=true"
+
+        cmd_array.append(agentCmd)
     cmd_array.extend( ["-ea", "-cp", jar_path+":conf:" + libs, java_main])
     cmd_array.extend(args)
     p = subprocess.Popen(cmd_array, stdout=subprocess.PIPE, stderr=None)
