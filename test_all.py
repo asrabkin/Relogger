@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import sys
 import time
+import socket
 
 
 from collections import defaultdict
@@ -34,7 +35,13 @@ def main():
     print "Running second test: persistance"
     test_persist()
     test_mapfile()
-    print "testing message-numbering"
+    print "testing control interface"
+    if os.path.exists('relogger'):
+        shutil.rmtree("relogger") #Deletes default cached-mappings.
+    shutil.os.mkdir("relogger")
+
+    test_ctrl_interface()
+    print "Running 4th test: message-numbering"
     test_numbering()
     print "Doing performance test"
 
@@ -132,6 +139,7 @@ def    test_mapfile():
 
 
 def test_numbering():
+    """Tests that we can rewrite statement numbers"""
     if os.path.exists('relogger'):
         shutil.rmtree("relogger")
     shutil.os.mkdir("relogger")
@@ -142,6 +150,26 @@ def test_numbering():
         print "...ok"
     else:
         print "ERR: Failed with output" + relogged
+
+
+def test_ctrl_interface():
+
+    cmd_array = ["java", "-javaagent:numberedlogs.jar", ]
+    cmd_array.extend( ["-ea", "-cp", jar_path+":conf:" + libs, "edu.berkeley.numberlogs.test.LoopPrint"])
+    p = subprocess.Popen(cmd_array, stdout=subprocess.PIPE, stderr=None)
+    
+    time.sleep(2)
+    sock = socket.socket( socket.AF_INET, socket.SOCK_DGRAM ) # UDP
+    sock.sendto( "up 1", ("127.0.0.1", 2345) )
+    f = open("relogger/commands", "w")
+    print >>f,"up 2"
+    f.close()
+#    time.sleep(5)
+    (output, err) = p.communicate()
+#    print output   
+    assert "message one" in output, "UDP interface not working"
+    assert "message two" in output, "File interface not working"
+
 
 def test_rewrite_perf():
     pass
@@ -215,7 +243,7 @@ def get_perftable(cmd_out):
     return table
 
 
-# java -javaagent:numberedlogs.jar -cp numberedlogs.jar:lib/log4j-1.2.15.jar:lib/commons-logging-api-1.0.4.jar:lib/commons-logging-1.0.4.jar:lib/javassist-3.15.0.jar:conf edu.berkeley.BaseTest
+# java -javaagent:numberedlogs.jar -cp numberedlogs.jar:lib/log4j-1.2.15.jar:lib/commons-logging-api-1.0.4.jar:lib/commons-logging-1.0.4.jar:lib/javassist-3.15.0.jar:conf edu.berkeley.numberlogs.test.BaseTest
 
 
 

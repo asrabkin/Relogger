@@ -21,17 +21,20 @@ public class CommandInterface extends Thread {
         int[] stmtIDs = designatorToIDs(words[1]);
         
         if(cmd.equals("up") || cmd.equals("on")) {
-          for(int stmtID : stmtIDs)
-            NumberedLogging.updateUser(stmtID, false);
+          NumberedLogging.updateUser(stmtIDs, false);
         } else if(cmd.equals("down") || cmd.equals("off")) {
-          for(int stmtID : stmtIDs)
-            NumberedLogging.updateUser(stmtID, true);
+          NumberedLogging.updateUser(stmtIDs, true);
+        } else if(cmd.equals("down") || cmd.equals("off")) {
+          NumberedLogging.clearUser(stmtIDs);
         } else if (cmd.equals("setmeth") && words.length > 2) {
           for(int stmtID : stmtIDs)
             NumberedLogging.setMeth(stmtID, words[2]);
         } else if(cmd.equals("once")) {
-          for(int stmtID : stmtIDs)
-            NumberedLogging.clearPrintedOnce(stmtID);
+          NumberedLogging.clearPrintedOnce(stmtIDs);
+        } else if(cmd.equals("addtag")) {
+          mapping.addTags(  words[2]  , stmtIDs );
+        } else if(cmd.equals("rmtag") || cmd.equals("deltag")) {
+          mapping.rmTags(  words[2]  , stmtIDs );
         } else {
           System.err.println("Unknown log-rewrite command " + cmd);
         }

@@ -68,7 +68,7 @@ public abstract class AbstractNumberer implements ClassFileTransformer {
   public AbstractNumberer(String agentArgs) {
     
     int portno = UDPCommandListener.DEFAULT_PORT;
-    File outFile = IDMapper.DEFAULT_MAPPING;
+    File mappingFile = IDMapper.DEFAULT_MAPPING;
 
     if(agentArgs != null && agentArgs.length() > 0) {
       for(String s: agentArgs.split(",")) {
@@ -84,27 +84,32 @@ public abstract class AbstractNumberer implements ClassFileTransformer {
         else if(optKey.equals("alwaysonce"))
           NumberedLogging.ALWAYS_PRINT_ONCE = !optVal.equals("false"); //default to true
         else if(optKey.equals("file"))
-          outFile = new File(optVal);
+          mappingFile = new File(optVal);
         else
           parseOptionKV(optKey,optVal);
       }
     }
     
-    IDMapReconciler.doDummyWrite(outFile);
+    IDMapReconciler.doDummyWrite(mappingFile);
 
     IDMap = new IDMapper();
     NumberedLogging.mapper = IDMap;
-    IDMapReconciler rec = new IDMapReconciler(outFile, IDMap);
+    IDMapReconciler rec = new IDMapReconciler(mappingFile, IDMap);
     try {
-      if(outFile.exists())
+      if(mappingFile.exists())
         rec.readMap();
     } catch(IOException e) {
       e.printStackTrace();
     }
-    RecordStatements.init(outFile.getParentFile(), IDMap);
+    RecordStatements.init(mappingFile.getParentFile(), IDMap);
     rec.start(); //TODO: is there a race condition if the thread hasn't started before stop?
     UDPCommandListener ucl = new UDPCommandListener(portno, IDMap);
     ucl.start();
+    File parentDir = mappingFile.getParentFile();
+    FileCommandListener fcl = new FileCommandListener(new File(parentDir, "commands"), IDMap);
+    fcl.start();
+
+    
     Runtime.getRuntime().addShutdownHook(new IDMapReconciler.WriterThread(rec));
     System.out.println("UDP listener alive on port " + ucl.portno);
   }

@@ -34,6 +34,10 @@ public class IDMapper {
       if(!tags.contains(t))
         tags.add(t);
     }
+
+    public synchronized void removeTag(String tag) {
+      tags.remove(tag);
+    }
     
   }
   
@@ -145,8 +149,14 @@ public class IDMapper {
         if( globalID > nextID)
           nextID = globalID + 1;
         for(int tagno=3; tagno < p.length; ++tagno) {
-          ts.tag(p[tagno], globalID);
-          stmt.addTag(p[tagno]);
+/*          if(p[tagno].equals("on")) {
+
+          } else if(p[tagno].equals("off")) {
+            
+          } else {*/
+            ts.tag(p[tagno], globalID);
+            stmt.addTag(p[tagno]);
+//          }
         }
       }
     } catch(Exception e) {
@@ -223,6 +233,26 @@ public class IDMapper {
     while( (s= in.readLine()) != null) {
       String[] parts = s.split(" ");
       relocationTable.put(parts[0], parts[1]);
+    }
+  }
+
+
+  public synchronized void addTags(String tag, int[] stmtIDs) {
+    for(int id: stmtIDs) {
+      StmtInfo st = info.get(id);
+      if(st != null)
+        st.addTag(tag);
+      ts.tag(tag, id);
+    }
+  }
+  
+
+  public synchronized void rmTags(String tag, int[] stmtIDs) {
+    for(int id: stmtIDs) {
+      StmtInfo st = info.get(id);
+      if(st != null)
+        st.removeTag(tag);
+      ts.untag(tag, id);
     }
   }
 

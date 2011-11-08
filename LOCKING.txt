@@ -9,5 +9,6 @@ From first-to-last
 
 Note that a consequence of this lock order is that at classloading time, it's possible to get locks on things, but that while holding locks on IDMap or NumberedLogging, it's NOT OK to load a class.
 
+Also note that IDMap can tinker with the statement state, but not the other way around. This is required to support the special 'on' and 'off' tags
 
 TODO:  Order of 2 and 3 can be changed, potentially.

@@ -28,7 +28,8 @@ public class UDPCommandListener extends CommandInterface {
       while(true) {
         ds.receive(p);
         String contents = new String(buf, p.getOffset(), p.getLength());
-        doCommand(contents);
+        for(String s: contents.split("\n"))
+          doCommand(s);
       }
     
     } catch (IOException e) {

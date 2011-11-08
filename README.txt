@@ -39,7 +39,41 @@ Formally:
 		  = <option=value>,<arglist>
 
 Available options:
-	port/portno  	The UDP port on which to listen for instructions.
-	file		The location to store statement-numbering information.
+	port/portno  	The UDP port on which to listen for instructions. Defaults to 2345
+	file		The location to read and store statement-numbering information.  Defaults to 'relogger/mapping.out'
 	alwaysonce	Whether to print every message at least once. Any value for this option evaluates to true, except 'false'
 	
+
+UDP SYNTAX
+	
+Relogger takes several UDP commands. Many of these commands take a statement-set as argument. This is a string that designates one or more log statements.
+
+	up <statement>		Enables a given statement-set
+	on <statement>
+
+	down <statement>	Disables a given statement-set
+	off
+
+	once <statement>	Print the given statement-set at least once the next time it appears
+
+
+<statement> =  [numeric ID]
+            =  [canonical ID of the form 0x...._lineno]
+            =  [class name:lineno]
+
+
+FILE SYNTAX
+	
+In addition to UDP, it's possible to configure Relogger by creating a file named "commands" in the same directory as the mapping file.  This file is read whenever it changes. It should contain a list of commands, using the same syntax as for UDP.
+
+
+
+TAGS
+
+Tags are an in-progress feature. A tag is a string that labels a set of messages. This comes with two new commands:
+	addtag <statement> <tag> 	Add the given tag to the given statement-set
+
+	rmtag <statement> <tag>		Remove the given tag from the given statement-set
+	deltag <statement> <tag>
+
+

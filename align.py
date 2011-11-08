@@ -14,6 +14,9 @@ import time
 
 from collections import defaultdict
 
+# python align.py ~/Documents/cloudera/log-and-opt-names/0.18.2-results/0.18.2-static_stmt_numbering.txt ~/Documents/cloudera/log-and-opt-names/apache-0.20.2-results/apache-0.20.2-static_stmt_numbering.txt ~/Documents/cloudera/log-and-opt-names/0.20.2-cdh3u0-results/0.20.2-cdh3u0-static_stmt_numbering.txt ~/Documents/cloudera/log-and-opt-names/hadoop22-results/hadoop22-static_stmt_numbering.txt
+
+
 SHOW_EXACT = False
 SHOW_APPROXIMATE = False
 SHOW_UNMATCHED = False

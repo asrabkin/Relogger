@@ -20,6 +20,16 @@ public class TagSets {
       contents = new int[START_SIZE];
       entryCount = 0;
     }
+
+    public void remove(int ID) {
+      for(int i = 0; i < entryCount; ++i) {
+        if(contents[i] == ID) {
+          contents[i] = contents[entryCount -1];
+          contents[entryCount -1] = 0;
+          entryCount --;
+        }
+      }
+    }
   }
   
   protected HashMap<String, TagSet> tagsByName = new HashMap<String, TagSet>(10);
@@ -39,6 +49,13 @@ public class TagSets {
       tagsByName.put(tagSetName, t);
     }
     t.add(ID);
+  }
+  
+  public synchronized void untag(String tagSetName, int ID) {
+    TagSet t = tagsByName.get(tagSetName);
+    if(t != null) {
+      t.remove(ID);
+    }
   }
    
 

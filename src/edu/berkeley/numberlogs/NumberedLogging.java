@@ -50,17 +50,33 @@ public class NumberedLogging {
     return cachedMaskTable.get(id);
   }
 
-  static synchronized void updateUser(int i, boolean isDisabled) {
+  static synchronized void updateUser(int[] stmtIDs, boolean isDisabled) {
     //Updates both user and cached map table
-    userDisabled.set(i, isDisabled);
-    userEnabled.set(i, !isDisabled);
-    changeCacheDisable(i, isDisabled);
+    for(int i : stmtIDs) {
+      userDisabled.set(i, isDisabled);
+      userEnabled.set(i, !isDisabled);
+    }
+    changeCacheDisable(stmtIDs, isDisabled);
   }
-  
 
-  public static synchronized void clearPrintedOnce(int stmtID) {
-    printedOnce.clear(stmtID);
-    changeCacheDisable(stmtID, false);
+  /**
+   * Clear both user-enabled and user-disabled flags
+   */
+  static synchronized void clearUser(int[] stmtIDs) {
+    //Updates both user and cached map table
+    for(int i: stmtIDs) {
+      userDisabled.set(i, false);
+      userEnabled.set(i, false);
+    }
+    changeCacheDisable(stmtIDs, false);
+  }
+
+  public static synchronized void clearPrintedOnce(int[] stmtIDs) {
+    
+    for(int id : stmtIDs) {
+      printedOnce.clear(id);
+    }
+    changeCacheDisable(stmtIDs, false);
   }
   
 
@@ -82,6 +98,19 @@ public class NumberedLogging {
     BitSet newTable = new BitSet(newLen);
     newTable.or(cachedMaskTable);
     newTable.set(id, newVal);
+    cachedMaskTable = newTable;
+  }
+  
+  private static void changeCacheDisable(int[] ids, boolean newVal) {
+
+    int newLen = cachedMaskTable.size();
+    for(int i: ids)
+        if(i >= newLen)
+            newLen = i + 1;
+    BitSet newTable = new BitSet(newLen);
+    newTable.or(cachedMaskTable);
+    for(int i: ids)
+      newTable.set(i, newVal);
     cachedMaskTable = newTable;
   }
 
