@@ -327,3 +327,26 @@ We can override:
     public void log(net.lag.logging.Level, java.lang.String, scala.Seq);
 
 Will require scalalib at compile time but not run-time.
+
+
+11/13:
+	Checked for dynamic ambiguity.  Found 9 cases at INFO level, 58 at DEBUG, 67 total. About the same ratio as for general text (6 to 1). Out of 3500 total messages.    Call it 2% of messages dynamically.  
+
+11/14:
+	Trouble repeating for Pastry. Weaker workload. Static matching doesn't work well. 
+
+FINER:
+
+
+67316   rice.p2p.commonapi.testing.CommonAPITest log .* s2:.*
+6       rice.p2p.scribe.ScribeImpl log Forwarding anycast message for topic .*on to .*
+20      rice.pastry.PastryNode log doneNode:.*
+10      rice.pastry.PastryNode log Destroying .*
+153     rice.p2p.scribe.ScribeImpl log Removing client .* from list of outstanding for ack .*
+
+
+FINE
+
+1       rice.pastry.standard.StandardRouter log Dropping message .* because the application address .* is unknown.
+24921   rice.p2p.commonapi.testing.CommonAPITest log .* s2:.*
+6       rice.pastry.PastryNode log doneNode:.*

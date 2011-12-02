@@ -22,6 +22,10 @@ FUTURE FEATURES, (can be added if useful)
 - Tagging messages with arbitrary strings, like "USER" or "ADMINISTRATOR."
 - Changing the printed priority; if you think an ERROR message isn't, you can change that without recompiling, or even relaunching, your program.
 
+BUILDING RELOGGER
+
+Just say 'ant'.  You should get a numberedlogs.jar
+
 
 USING RELOGGER
 

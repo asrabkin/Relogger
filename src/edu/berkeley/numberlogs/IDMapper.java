@@ -10,7 +10,10 @@ import java.io.*;
  * A map between global and local IDs. This is only used by the instrumentor.
  * It is a singleton per program, since there is only one instrumentor.
  * 
- * Mappings may be added either due to a class-load or via the Reconciler thread;
+ * Mappings may be added either due to a class-load or via the Reconciler thread.
+ * 
+ * File format is successive lines each of which matches
+ *    <canonicalID> <globalID> <classname>( <tag>)*
  * 
  * @author asrabkin
  *
@@ -139,13 +142,15 @@ public class IDMapper {
         String[] p = ln.split(" ");
         int globalID = Integer.parseInt(p[1]);
         StmtInfo stmt;
-        if(!mapping.containsKey(p[0])) {
+        if(!mapping.containsKey(p[0])) { //new statement
           mapping.put(p[0], globalID);
           stmt = new StmtInfo(p[0], p[2], globalID);
           info.put(globalID, stmt);
           madeChange = true;
-        } else
-          stmt = info.get(globalID);
+        } else {
+          int myGID = mapping.get(p[0]);
+          stmt = info.get(myGID);
+        }
         if( globalID > nextID)
           nextID = globalID + 1;
         for(int tagno=3; tagno < p.length; ++tagno) {

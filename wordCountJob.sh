@@ -29,7 +29,7 @@ if !(ps aux | grep namenode | grep -vq 'grep')
 then
   echo "No Hadoop HDFS running. Formatting FS..."
   $HADOOP/bin/hadoop --config $CONFDIR namenode -format > $TESTNAME/nn_format.log 2>&1
-  echo "Format done. Starting workers."
+  echo "Format done. Starting filesystem."
   ($HADOOP/bin/hadoop --config $CONFDIR namenode > $TESTNAME/nn.log 2>&1) &
   ($HADOOP/bin/hadoop --config $CONFDIR datanode > $TESTNAME/dn.log 2>&1) &
   ($HADOOP/bin/hadoop --config $CONFDIR secondarynamenode > $TESTNAME/2nn.log 2>&1) &
